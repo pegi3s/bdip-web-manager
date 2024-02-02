@@ -1,1 +1,103 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  font-family: Inter, sans-serif;
+  font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+
+  /* Blink: "position: fixed" does not respect "scrollbar-gutter: stable" */
+  /* https://issues.chromium.org/issues/40792788 */
+  /* scrollbar-gutter: stable; */
+  --horizontal-main-margin: 36px;
+  @media (min-width: 640px) {
+    --horizontal-main-margin: 72px;
+  }
+}
+
+@supports (font-variation-settings: normal) {
+  :root { font-family: InterVariable, sans-serif; }
+}
+
+:root {
+  --slate-50: 248, 250, 252;
+  --slate-100: 241, 245, 249;
+  --slate-200: 226, 232, 240;
+  --slate-300: 203, 213, 225;
+  --slate-400: 148, 163, 184;
+  --slate-500: 100, 116, 139;
+  --slate-600: 71, 85, 105;
+  --slate-700: 51, 65, 85;
+  --slate-800: 30, 41, 59;
+  --slate-900: 15, 23, 42;
+  --slate-950: 2, 6, 23;
+  /*#42a7f0*/
+  --picton-blue-50: 241, 248, 254;
+  --picton-blue-100: 225, 239, 253;
+  --picton-blue-200: 189, 222, 250;
+  --picton-blue-300: 130, 196, 247;
+  --picton-blue-400: 66, 167, 240;
+  --picton-blue-500: 23, 138, 224;
+  --picton-blue-600: 10, 109, 191;
+  --picton-blue-700: 10, 87, 154;
+  --picton-blue-800: 12, 74, 128;
+  --picton-blue-900: 16, 63, 106;
+  --picton-blue-950: 11, 39, 70;
+  /*Tailwind-green*/
+  --green-300: 134, 239, 172;
+  --green-500: 34, 197, 94;
+  --green-700: 21, 128, 61;
+  --green-900: 20, 83, 45;
+  /*Tailwind-amber*/
+  --amber-300: 252, 211, 77;
+  --amber-500: 245, 158, 11;
+  --amber-700: 180, 83, 9;
+  --amber-900: 120, 53, 15;
+  /*Tailwind-red*/
+  --red-300: 252, 165, 165;
+  --red-500: 239, 68, 68;
+  --red-700: 185, 28, 28;
+  --red-900: 127, 29, 29;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  /* --main-bg-color: rgb(246, 246, 246); */
+  --color-surface-container-lowest: 252, 252, 252;
+  --color-surface-container: 255, 255, 255;
+  --color-surface-container-high: 255, 255, 255;
+
+  --main-font-color: 0, 0, 0;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  /* --main-bg-color: rgb(11 15 18); */
+  --color-surface-container-lowest: 13, 15, 23;
+  --color-surface-container: 28, 34, 46;
+  --color-surface-container-high: 36, 44, 54;
+
+  --main-font-color: 255, 255, 255;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: rgb(var(--color-surface-container-lowest));
+  color: rgb(var(--main-font-color));
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+svg-icon {
+  display: contents;
+}

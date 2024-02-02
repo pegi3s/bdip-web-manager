@@ -1,0 +1,9 @@
+<div class="container">
+  <ul>
+    @for (img of logos(); track $index) {
+      <li [style.--index]="$index">
+        <img [src]="img" />
+      </li>
+    }
+  </ul>
+</div>

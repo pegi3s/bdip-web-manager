@@ -1,0 +1,26 @@
+# Workflow to build and publish the Angular app to GitHub Pages
+name: Build and Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build and Deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run ng -- deploy --base-href=/dockerfiles-website/ --name="github-actions[bot]" --email=41898282+github-actions[bot]@users.noreply.github.com

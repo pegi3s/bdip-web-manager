@@ -1,0 +1,165 @@
+/* Based on https://codepen.io/jh3y/pen/XWGNONP */
+:host {
+  --radius: 8px;
+  --border: 1px;
+  --height: 48px;
+  --speed: 0.25s;
+
+  display: grid;
+  /* grid-auto-columns: 1fr; */
+  position: relative;
+  grid-auto-flow: column;
+  column-gap: var(--border);
+  margin-bottom: 16px;
+  border: var(--border) solid rgba(var(--slate-300), 1);
+  border-radius: var(--radius);
+  background: rgba(var(--slate-100), 1);
+  width: max-content;
+}
+
+:host-context(.dark) :host {
+  border: var(--border) solid rgba(var(--slate-400), 0.15);
+  background: rgba(var(--slate-800), 0.7);
+}
+
+:host {
+  --ease: linear(
+    0,
+    0.1641 3.52%,
+    0.311 7.18%,
+    0.4413 10.99%,
+    0.5553 14.96%,
+    0.6539 19.12%,
+    0.738 23.5%,
+    0.8086 28.15%,
+    0.8662 33.12%,
+    0.9078 37.92%,
+    0.9405 43.12%,
+    0.965 48.84%,
+    0.9821 55.28%,
+    0.992 61.97%,
+    0.9976 70.09%,
+    1
+  );
+}
+
+:host > input {
+  position: absolute;
+  margin: -1px;
+  padding: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border-width: 0;
+  white-space: nowrap;
+}
+
+:host:has(:checked:nth-of-type(1)) {
+  --active: --choice-1;
+}
+:host:has(:checked:nth-of-type(2)) {
+  --active: --choice-2;
+}
+:host:has(:checked:nth-of-type(3)) {
+  --active: --choice-3;
+}
+
+:host label {
+  display: grid;
+  grid-auto-flow: column;
+  column-gap: 8px;
+  place-items: center;
+  z-index: 1;
+  transition: background, color;
+  transition-duration: 0.25s;
+  transition-timing-function: var(--ease, ease);
+  cursor: pointer;
+  border-radius: calc(var(--radius) - var(--border));
+  padding: 8px clamp(0.5rem, 2vw + 0.25rem, 2rem);
+  height: 100%;
+  color: hsl(0 0% 100% / calc(0.6 + var(--highlight, 0)));
+  text-align: center;
+}
+
+:host-context(.only-icons) label {
+  padding: 8px;
+}
+
+:host :checked + label {
+  --highlight: 1;
+}
+
+input:not(:checked) + label {
+  color: hsl(0 0% 0% / calc(0.8 + var(--highlight, 0)));
+}
+
+:host-context(.dark) input:not(:checked) + label {
+  color: hsl(0 0% 100% / calc(0.6 + var(--highlight, 0)));
+}
+
+input:not(:checked) + label:hover {
+  --highlight: 0.15;
+  background: rgba(var(--slate-300), 0.7);
+}
+
+:host-context(.dark) input:not(:checked) + label:hover {
+  --highlight: 0.3;
+  background: rgba(var(--slate-400), 0.15);
+}
+
+.indicator {
+  position: absolute;
+  transition: inset, outline-color;
+  transition-duration: var(--speed);
+  transition-timing-function: var(--ease, ease);
+  outline: 1px solid transparent;
+  border-radius: calc(var(--radius) - var(--border));
+  background: rgba(var(--slate-900), 1);
+  pointer-events: none;
+  anchor-default: var(--active, --choice-1);
+  inset: 0 anchor(var(--active) right) 0 anchor(var(--active) left);
+}
+
+:host-context(.dark) .indicator {
+  background: rgba(var(--color-surface-container-lowest), 0.8);
+}
+
+:host:has(:focus-visible) .indicator {
+  outline-color: red;
+}
+
+:host label:nth-of-type(1) {
+  anchor-name: --choice-1;
+}
+
+:host label:nth-of-type(2) {
+  anchor-name: --choice-2;
+}
+
+:host label:nth-of-type(3) {
+  anchor-name: --choice-3;
+}
+
+:host :is(svg, img) {
+  height: 19px;
+}
+
+label:not(:has(span)) :is(svg, img) {
+  height: 24px;
+}
+
+/* 01/06/2024 Firefox does not support Anchor Positioning */
+@supports not (anchor-name: --choice-1) {
+  indicator {
+    visibility: hidden;
+  }
+
+  input:checked + label {
+    background: rgba(var(--slate-900), 1);
+  }
+
+  :host-context(.dark) input:checked + label {
+    background: rgba(var(--color-surface-container-lowest), 0.8);
+  }
+}

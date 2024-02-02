@@ -1,0 +1,12 @@
+<section>
+  <app-file-picker [pickDirectory]="true" [expectedFile]="filesToUpload" filenameHint="metadata" (fileSelected)="onFileSelected($event)"></app-file-picker>
+  <p>or</p>
+  <div class="file-pickers">
+    @for(file of filesToUpload; track file) {
+      <app-file-picker [expectedFile]="[file]" [filenameHint]="file" (fileSelected)="onFileSelected($event)"></app-file-picker>
+    }
+  </div>
+  @if (showContinueButton()) {
+    <button (click)="onContinue()">Continue</button>
+  }
+</section>

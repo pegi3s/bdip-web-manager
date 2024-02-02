@@ -1,0 +1,36 @@
+section {
+  margin-inline: auto;
+  padding: calc(35px + var(--header-height)) var(--horizontal-main-margin) 35px;
+  max-inline-size: 2048px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 35px;
+}
+
+.header > h2 {
+  margin: 0;
+}
+
+.header > button {
+  width: 40px;
+  height: 40px;
+  color: #fff;
+  background-color: rgba(99, 0, 237, 0.5);
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0px 2px 1px -1px rgb(0 0 0 / 20%), 0px 1px 1px 0px rgb(0 0 0 / 14%), 0px 1px 3px 0px rgb(0 0 0 / 12%);
+  transition: background-color 0.3s;
+  outline: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.ontology-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}

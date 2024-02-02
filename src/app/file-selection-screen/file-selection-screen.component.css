@@ -1,0 +1,22 @@
+section {
+  margin-inline: auto;
+  padding: calc(35px + var(--header-height)) var(--horizontal-main-margin) 35px;
+  max-inline-size: 2048px;
+}
+
+section {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr min-content 1fr;
+
+  /* or */
+  > p {
+    align-self: center;
+  }
+}
+
+.file-pickers {
+  display: grid;
+  gap: 20px;
+  grid-template-rows: 1fr 1fr 1fr;
+}

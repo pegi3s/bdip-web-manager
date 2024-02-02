@@ -1,0 +1,107 @@
+:host {
+  --card-bg-color: rgb(255, 255, 255);
+  --card-bg-color-hover: hsla(var(--color), 100%, 97.5%);
+  --card-border-color: rgb(229, 231, 235);
+  --icon-outer-box-color: hsl(var(--color), 90%, 75%);
+  --icon-inner-box-color: hsl(var(--color), 60%, 45%);
+}
+
+:host-context(.dark) {
+  --card-bg-color: rgb(43, 43, 43, 0.6);
+  --card-bg-color-hover: hsla(var(--color), 10%, 20%);
+  --card-border-color: rgb(58, 58, 60);
+  --icon-outer-box-color: hsl(var(--color), 90%, 65%);
+  --icon-inner-box-color: hsl(var(--color), 55%, 40%);
+}
+
+:host {
+  display: block;
+
+  transition-duration: 0.2s;
+  transition-property: border-color, box-shadow;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+
+  box-shadow: rgba(0, 0, 0, 0.1) 0 10px 32px 0;
+  border: 2px solid var(--card-border-color);
+  border-radius: 14px;
+  background-color: var(--card-bg-color);
+  padding: 20px;
+
+  --color: 0;
+}
+
+.icon-container {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+
+  transition-duration: 0.2s;
+  transition-property: border-color, transform;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+
+  width: 62px;
+  height: 62px;
+
+  --rotate: 6deg;
+
+  div {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    transition-duration: 0.2s;
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  .outer-box {
+    transform: rotate(var(--rotate));
+    border-radius: 24px;
+    background-color: var(--icon-outer-box-color);
+  }
+
+  .inner-box {
+    transform: rotate(calc(var(--rotate) * -1));
+    margin: 9px;
+    border-radius: 16px;
+    background-color: var(--icon-inner-box-color);
+  }
+}
+
+:host:hover {
+  box-shadow: hsla(var(--color), 100%, 75%, 0.2) 0 10px 32px 0;
+  border-color: hsl(var(--color), 100%, 75%);
+  background-color: var(--card-bg-color-hover);
+
+  .icon-container {
+    transform: scale(1.05);
+  }
+
+  .outer-box,
+  .inner-box {
+    --rotate: 0deg;
+  }
+}
+
+svg-icon {
+  display: contents;
+}
+
+svg {
+  z-index: 1;
+  fill: white;
+  width: 24px;
+  height: 24px;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.description {
+  color: rgba(var(--main-font-color), 0.85);
+}

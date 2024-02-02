@@ -1,0 +1,17 @@
+<button class="dropdown-button" (click)="toggleDropdown()">
+  <svg-icon [src]="items()[selected()].icon"/>
+  {{ items()[selected()].name }}
+  <svg-icon src="assets/icons/fluent-icons/ic_fluent_chevron_down_24_regular.svg"/>
+</button>
+
+@if (isDropdownOpen()) {
+  <div class="dropdown-menu">
+    @for (item of items(); track item.name; let index = $index) {
+      <div class="dropdown-item" (click)="selected.set(index); toggleDropdown()">
+        <svg-icon [src]="item.icon"/>
+        <span class="dropdown-name">{{ item.name }}</span>
+      </div>
+    }
+  </div>
+}
+

@@ -1,0 +1,15 @@
+<section>
+  <div class="header">
+    <h2>Edit ontology</h2>
+    <button class="material-symbols-rounded" (click)="save()">save</button>
+  </div>
+  <div class="ontology-container">
+    @for (category of getRootCategories(); track $index) {
+      <app-ontology-editor-element
+        [ontology]="ontology"
+        [category]="category"
+        [containers]="containers"
+      />
+    }
+  </div>
+</section>

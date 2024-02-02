@@ -1,0 +1,34 @@
+<!-- <div (click)="loadChildren(category)"> -->
+
+<div class="name">
+<!--  <span class="material-symbols-rounded expand">expand_more</span>-->
+  <svg-icon src="assets/icons/fluent-icons/ic_fluent_chevron_down_24_filled.svg" class="expand"></svg-icon>
+  <p>
+    {{ category()?.name?.replaceAll("_", " ") }}
+  </p>
+  <div class="dummy"></div>
+</div>
+<div class="actions">
+  <button>
+    <svg-icon src="assets/icons/fluent-icons/ic_fluent_copy_16_regular.svg"></svg-icon>
+  </button>
+  <button (click)="removeStanza()">
+    <svg-icon src="assets/icons/fluent-icons/ic_fluent_dismiss_circle_12_filled.svg"></svg-icon>
+  </button>
+</div>
+
+<div class="children">
+  @for (category of category()?.getChildren(); track $index) {
+    <app-ontology-editor-element
+      [ontology]="ontology()"
+      [category]="category"
+      [containers]="containers()"
+    />
+  }
+  @for (container of containers()?.get(category()?.id || ""); track $index) {
+    <div>{{ container }}</div>
+  }
+  <button class="add" (click)="addStanza()">
+    <svg-icon src="assets/icons/fluent-icons/ic_fluent_add_24_filled.svg"></svg-icon>
+  </button>
+</div>

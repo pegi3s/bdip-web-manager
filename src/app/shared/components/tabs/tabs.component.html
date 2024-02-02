@@ -1,0 +1,14 @@
+<div class="indicator"></div>
+@for (tab of tabs(); track tab.id) {
+  <input type="radio" [id]="tab.id" name="tabs" (change)="onSelectTab(tab)" [checked]="tab.active" />
+  <label class="tab" [for]="tab.id">
+    @if (tab.icon) {
+      @if (tab.icon.endsWith('.svg')) {
+        <svg-icon [src]="tab.icon" [svgAriaLabel]="tab.label" />
+      }
+    }
+    @if (tab.label) {
+      <span>{{ tab.label | titlecase }}</span>
+    }
+  </label>
+}
