@@ -2,13 +2,12 @@ import { Component, input, output, signal } from "@angular/core";
 import { SvgIconComponent } from "angular-svg-icon";
 
 @Component({
-  selector: "app-file-picker",
-  standalone: true,
-  imports: [
-    SvgIconComponent
-  ],
-  templateUrl: "./file-picker.component.html",
-  styleUrl: "./file-picker.component.css"
+    selector: "app-file-picker",
+    imports: [
+        SvgIconComponent
+    ],
+    templateUrl: "./file-picker.component.html",
+    styleUrl: "./file-picker.component.css"
 })
 export class FilePickerComponent {
   readonly pickDirectory = input<boolean>(false);

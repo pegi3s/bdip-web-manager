@@ -4,13 +4,12 @@ import { Ontology } from '../obo/Ontology';
 import { SvgIconComponent } from "angular-svg-icon";
 
 @Component({
-  selector: 'app-ontology-editor-element',
-  standalone: true,
-  imports: [
-    SvgIconComponent
-  ],
-  templateUrl: './ontology-editor-element.component.html',
-  styleUrl: './ontology-editor-element.component.css',
+    selector: 'app-ontology-editor-element',
+    imports: [
+        SvgIconComponent
+    ],
+    templateUrl: './ontology-editor-element.component.html',
+    styleUrl: './ontology-editor-element.component.css'
 })
 export class OntologyEditorElementComponent {
   ontology = input<Ontology>();

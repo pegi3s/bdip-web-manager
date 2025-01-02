@@ -4,12 +4,11 @@ import { Theme } from '../../enums/theme';
 import { SvgIconComponent } from 'angular-svg-icon';
 
 @Component({
-  selector: "app-theme-toggle",
-  imports: [SvgIconComponent],
-  templateUrl: "./theme-toggle.component.html",
-  styleUrl: "./theme-toggle.component.css",
-  standalone: true,
-  host: { "[class.dark]": "isDarkTheme()" }
+    selector: "app-theme-toggle",
+    imports: [SvgIconComponent],
+    templateUrl: "./theme-toggle.component.html",
+    styleUrl: "./theme-toggle.component.css",
+    host: { "[class.dark]": "isDarkTheme()" }
 })
 export class ThemeToggleComponent {
   themeService: ThemeService = inject(ThemeService);

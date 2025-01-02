@@ -2,13 +2,12 @@ import { Component, computed, signal } from "@angular/core";
 import { FilePickerComponent } from "../file-picker/file-picker.component";
 
 @Component({
-  selector: 'app-file-selection-screen',
-  standalone: true,
-  imports: [
-    FilePickerComponent
-  ],
-  templateUrl: './file-selection-screen.component.html',
-  styleUrl: './file-selection-screen.component.css'
+    selector: 'app-file-selection-screen',
+    imports: [
+        FilePickerComponent
+    ],
+    templateUrl: './file-selection-screen.component.html',
+    styleUrl: './file-selection-screen.component.css'
 })
 export class FileSelectionScreenComponent {
   readonly filesToUpload: string[] = ["dio.obo", "dio.diaf", "metadata.json"];

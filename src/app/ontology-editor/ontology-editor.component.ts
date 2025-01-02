@@ -5,11 +5,10 @@ import { OntologyEditorElementComponent } from '../ontology-editor-element/ontol
 import { Ontology } from '../obo/Ontology';
 
 @Component({
-  selector: 'app-ontology-editor',
-  standalone: true,
-  templateUrl: './ontology-editor.component.html',
-  styleUrl: './ontology-editor.component.css',
-  imports: [OntologyEditorElementComponent],
+    selector: 'app-ontology-editor',
+    templateUrl: './ontology-editor.component.html',
+    styleUrl: './ontology-editor.component.css',
+    imports: [OntologyEditorElementComponent]
 })
 export class OntologyEditorComponent {
   containerService: ContainerService = inject(ContainerService);
