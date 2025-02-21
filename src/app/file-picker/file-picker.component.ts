@@ -33,10 +33,26 @@ export class FilePickerComponent {
 
     if (fileHandlesPromises.length != 1) {
       alert("Submit only 1");
+      return;
     }
 
     const handle = (await fileHandlesPromises[0])!!;
+    await this.validateHandle(handle);
+  }
 
+  async openPicker(): Promise<void> {
+    let handle: FileSystemHandle;
+    if (this.pickDirectory()) {
+      handle = await window.showDirectoryPicker();
+    } else {
+      [handle] = await window.showOpenFilePicker();
+    }
+
+    await this.validateHandle(handle);
+  }
+
+  private async validateHandle(handle: FileSystemHandle): Promise<void> {
+    // In directories, check if all expected files are present
     if (this.pickDirectory() && handle.kind === "directory") {
       const dirHandle = handle as FileSystemDirectoryHandle;
 
