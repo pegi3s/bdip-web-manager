@@ -6,7 +6,6 @@ export type ImageMetadata = {
   latest: string;
   bug_found: BugFound[];
   not_working: string[];
-  recommended_last_tested: string;
   no_longer_tested: string[];
   manual_url: string;
   source_url: string;
@@ -26,17 +25,17 @@ export type ImageMetadata = {
   auto_tests: AutoTests[];
 };
 
-type Recommended = {
+export type Recommended = {
   version: string;
   date: string;
 }
 
-type BugFound = {
+export type BugFound = {
   version: string;
   description: string;
 }
 
-type AutoTests = {
+export type AutoTests = {
   docker_image: string;
   input_files: string[];
   output_dir: string;
