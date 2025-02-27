@@ -1,5 +1,6 @@
-import { Component, input, output, signal } from "@angular/core";
+import { Component, inject, input, output, signal } from "@angular/core";
 import { SvgIconComponent } from "angular-svg-icon";
+import { ThemeService } from "../services/theme.service";
 
 @Component({
     selector: "app-file-picker",
@@ -7,7 +8,8 @@ import { SvgIconComponent } from "angular-svg-icon";
         SvgIconComponent
     ],
     templateUrl: "./file-picker.component.html",
-    styleUrl: "./file-picker.component.css"
+    styleUrl: "./file-picker.component.css",
+    host: { '[class.dark]': 'this.isDarkTheme()' }
 })
 export class FilePickerComponent {
   readonly pickDirectory = input<boolean>(false);
@@ -15,6 +17,9 @@ export class FilePickerComponent {
   readonly filenameHint = input.required<string>();
 
   readonly fileSelected = output<FileSystemHandle>();
+
+  readonly themeService = inject(ThemeService);
+  readonly isDarkTheme = this.themeService.isDarkTheme();
 
   readonly fileSystemHandle = signal<FileSystemHandle | undefined>(undefined);
 

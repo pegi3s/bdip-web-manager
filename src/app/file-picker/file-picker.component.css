@@ -12,28 +12,20 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 2px dashed rgba(255, 255, 255, 0.5);
+  border: 2px dashed rgb(var(--slate-300));
   border-radius: 14px;
-  background-color: #F9FAFB;
+  background-color: rgb(var(--slate-50));
   transition: all 0.25s;
-
-  input {
-    display: none;
-  }
 }
 
 .dropzone:hover {
-  background-color: #F3F4F6; /* Hover color for light mode */
-  border-color: #6B7280; /* Border color on hover for light mode */
-}
-
-.dropzone:active {
-  background-color: #E5E7EB; /* Active color for light mode */
+  background-color: rgb(var(--slate-100));
+  border-color: rgb(var(--slate-400));
 }
 
 .dropzone.valid {
-  background-color: rgba(var(--green-300), 0.2);
-  border-color: rgba(var(--green-500), 0.4);
+  background-color: rgba(var(--green-300), 0.25);
+  border-color: rgba(var(--green-500), 0.5);
 }
 
 .dropzone-content {
@@ -51,17 +43,17 @@
 }
 
 .dropzone-text-main {
-  font-size: 0.875rem; /* text-sm */
-  color: #6B7280; /* Gray text */
+  font-size: 0.875rem;
+  color: rgb(var(--slate-800));
 }
 
 .dropzone-text-info {
-  font-size: 0.75rem; /* text-xs */
-  color: #6B7280; /* Gray text */
+  font-size: 0.75rem;
+  color: rgb(var(--slate-700));
 }
 
 /* Dark Mode */
-@media (prefers-color-scheme: dark) {
+:host-context(.dark) {
   .dropzone {
     background-color: rgba(var(--slate-800), 0.6);
     border-color: rgba(255, 255, 255, 0.25);
@@ -72,16 +64,17 @@
     border-color: rgba(255, 255, 255, 0.4);
   }
 
-  .dropzone:active {
-    background-color: #6B7280; /* Dark active color */
-  }
-
   .dropzone.valid {
     background-color: rgba(var(--green-900), 0.4);
     border-color: rgba(var(--green-500), 0.4);
   }
+}
 
-  .dropzone-icon, .dropzone-text-main, .dropzone-text-info {
-    color: rgb(var(--slate-100));
-  }
+:host-context(.dark) .dropzone-icon,
+:host-context(.dark) .dropzone-text-main {
+  color: rgb(var(--slate-100));
+}
+
+:host-context(.dark) .dropzone-text-info {
+  color: rgb(var(--slate-200));
 }
