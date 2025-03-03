@@ -1,0 +1,261 @@
+:root {
+  --hr-color: #e0e0e0;
+}
+
+/* Dialog container and structure */
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  width: 800px;
+  overflow: hidden;
+  padding: 24px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dialog-title {
+  margin: 0 6px 16px;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.dialog-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-inline: 6px;
+  max-height: calc(90vh - 161px);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hr-color);
+}
+
+/* Sections and headings */
+.main-section {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--hr-color);
+}
+
+.main-section:last-child {
+  border-bottom: none;
+}
+
+.main-section h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.subsection {
+  margin: 16px 0;
+  padding-left: 16px;
+}
+
+.subsection h4,
+.subsection h5 {
+  margin: 8px 0;
+  font-weight: 500;
+}
+
+.subsection h4 {
+  font-size: 16px;
+}
+
+.subsection h5 {
+  font-size: 14px;
+}
+
+/* Form elements */
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-field input,
+.form-field textarea,
+.form-field select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  color: rgb(var(--main-font-color));
+  background-color: #f9fafb;
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: rgba(var(--picton-blue-700), 0.9);
+  box-shadow: 0 0 0 2px rgba(var(--picton-blue-800), 0.25);
+}
+
+.form-field.checkbox-field {
+  display: flex;
+  align-items: center;
+}
+
+.form-field.checkbox-field input {
+  margin-right: 8px;
+}
+
+.form-field.checkbox-field label {
+  margin-bottom: 0;
+}
+
+.error {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Array items */
+.array-item {
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+}
+
+.array-item.auto-test-item {
+  padding: 16px;
+  border: 1px solid #ccc;
+  background-color: #f8f8f8;
+}
+
+.array-item.auto-test-item h4 {
+  margin-top: 0;
+}
+
+.array-item .form-field {
+  margin-bottom: 12px;
+}
+
+.array-item .form-field:last-child {
+  margin-bottom: 0;
+}
+
+/* Buttons */
+.add-btn,
+.remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.add-btn:hover,
+.remove-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.add-btn {
+  color: rgba(var(--picton-blue-600), 0.9);
+  font-weight: 500;
+}
+
+.add-btn::before {
+  content: '+';
+  margin-right: 6px;
+}
+
+.remove-btn {
+  color: rgb(var(--red-500));
+  margin-top: 8px;
+}
+
+.remove-btn::before {
+  content: '×';
+  margin-right: 4px;
+}
+
+.btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn.cancel-btn {
+  background-color: transparent;
+  color: rgba(var(--picton-blue-600), 0.9);
+}
+
+.btn.cancel-btn:hover {
+  background-color: rgba(var(--picton-blue-700), 0.1);
+}
+
+.btn.submit-btn {
+  background-color: rgba(var(--picton-blue-600), 0.9);
+  color: white;
+}
+
+.btn.submit-btn:hover {
+  background-color: rgba(var(--picton-blue-700), 0.9);
+}
+
+/* Dark mode overrides */
+:host-context(.dark) {
+  --hr-color: rgba(var(--slate-600), 0.8);
+}
+
+:host-context(.dark) .dialog-container {
+  background-color: rgb(var(--color-surface-container-lowest));
+}
+
+:host-context(.dark) .form-field input,
+:host-context(.dark) .form-field textarea,
+:host-context(.dark) .form-field select {
+  background-color: rgba(var(--slate-700), 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+:host-context(.dark) .array-item {
+  background-color: rgba(var(--color-surface-container), 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+}
+
+:host-context(.dark) .btn.cancel-btn {
+  color: rgba(var(--picton-blue-300), 1);
+}
+
+:host-context(.dark) .btn.cancel-btn:hover {
+  background-color: rgba(var(--picton-blue-500), 0.1);
+}
+
+:host-context(.dark) .btn.submit-btn {
+  background-color: rgba(var(--picton-blue-500), 1);
+}
+
+:host-context(.dark) .btn.submit-btn:hover {
+  background-color: rgba(var(--picton-blue-600), 1);
+}

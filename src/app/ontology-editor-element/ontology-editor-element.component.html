@@ -1,7 +1,6 @@
 <!-- <div (click)="loadChildren(category)"> -->
 
 <div class="name">
-<!--  <span class="material-symbols-rounded expand">expand_more</span>-->
   <svg-icon src="assets/icons/fluent-icons/ic_fluent_chevron_down_24_filled.svg" class="expand"></svg-icon>
   <p>
     {{ category()?.name?.replaceAll("_", " ") }}
@@ -26,9 +25,12 @@
     />
   }
   @for (container of containers()?.get(category()?.id || ""); track $index) {
-    <div>{{ container }}</div>
+    <div class="container">
+      {{ container }}
+      <button (click)="createEditContainer(container)">Edit</button>
+    </div>
   }
-  <button class="add" (click)="addStanza()">
+  <button class="add" (click)="createEditContainer()">
     <svg-icon src="assets/icons/fluent-icons/ic_fluent_add_24_filled.svg"></svg-icon>
   </button>
 </div>
