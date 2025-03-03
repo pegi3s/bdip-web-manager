@@ -1,50 +1,57 @@
-import { Component, inject } from '@angular/core';
-import { ContainerService } from '../services/container.service';
+import { Component, inject, signal } from "@angular/core";
 import { TermStanza } from '../obo/TermStanza';
 import { OntologyEditorElementComponent } from '../ontology-editor-element/ontology-editor-element.component';
 import { Ontology } from '../obo/Ontology';
+import { ContainerLocalService } from "../services/container-local.service";
+import { SvgIconComponent } from "angular-svg-icon";
+import { Router } from "@angular/router";
 
 @Component({
     selector: 'app-ontology-editor',
     templateUrl: './ontology-editor.component.html',
     styleUrl: './ontology-editor.component.css',
-    imports: [OntologyEditorElementComponent]
+  imports: [OntologyEditorElementComponent, SvgIconComponent]
 })
 export class OntologyEditorComponent {
-  containerService: ContainerService = inject(ContainerService);
-  ontology?: Ontology;
-  containers: Map<string, Set<string>> = new Map<string, Set<string>>();
+  containerService: ContainerLocalService = inject(ContainerLocalService);
+  readonly router = inject(Router);
 
-  ngOnInit() {
+  readonly ontology = signal<Ontology | undefined>(undefined);
+  readonly containers = signal<Map<string, Set<string>> | undefined>(undefined);
+
+  async ngOnInit() {
     console.log('Loading categories...');
-    this.containerService.getOntology(false).subscribe((ontology) => {
-      this.ontology = ontology;
-    });
-    this.containerService.getContainersMap().subscribe((containers) => {
-      this.containers = containers;
+    this.loadData().then((loaded) => {
+      if (loaded) {
+        console.log('Loaded categories');
+      } else {
+        this.router.navigate(['/']);
+      }
     });
   }
 
+  async loadData(): Promise<boolean> {
+    this.ontology.set(await this.containerService.getOntology(true));
+    this.containers.set(await this.containerService.getContainersMap(true));
+    await this.containerService.getContainersMetadata(true);
+
+    // Was the data loaded?
+    return this.ontology() != undefined && this.containers() != undefined;
+  }
+
   getRootCategories(): TermStanza[] {
-    if (this.ontology != null) {
-      return this.ontology.getAllOntologyTerms().filter((term) => !term.hasParents());
+    if (this.ontology() != null) {
+      return this.ontology()!!.getAllOntologyTerms().filter((term) => !term.hasParents());
     } else {
       return [];
     }
   }
 
-  save(): void {
-    if (this.ontology != null) {
-      const file = this.ontology.toOBOFile();
-      const url = URL.createObjectURL(file);
-
-      // Create an anchor element with the generated URL and programmatically click it to force the download
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'dio.obo';
-      a.click();
-
-      URL.revokeObjectURL(url);
+  async save(): Promise<void> {
+    if (this.ontology() != null && this.containers() != null) {
+      await this.containerService.saveOBOFile(this.ontology()!);
+      await this.containerService.saveDIAFFile(this.containers()!);
+      await this.containerService.saveMetadataFile();
     }
   }
 }

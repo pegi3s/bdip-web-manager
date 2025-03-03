@@ -15,11 +15,12 @@ section {
   margin: 0;
 }
 
-.header > button {
+.header button {
   width: 40px;
   height: 40px;
   color: #fff;
-  background-color: rgba(99, 0, 237, 0.5);
+  background-color: rgb(var(--picton-blue-600));
+  margin-left: 8px;
   border: none;
   border-radius: 1rem;
   box-shadow: 0px 2px 1px -1px rgb(0 0 0 / 20%), 0px 1px 1px 0px rgb(0 0 0 / 14%), 0px 1px 3px 0px rgb(0 0 0 / 12%);
@@ -27,6 +28,7 @@ section {
   outline: none;
   cursor: pointer;
   text-decoration: none;
+  line-height: 0;
 }
 
 .ontology-container {

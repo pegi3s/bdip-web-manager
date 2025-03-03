@@ -1,14 +1,21 @@
 <section>
   <div class="header">
     <h2>Edit ontology</h2>
-    <button class="material-symbols-rounded" (click)="save()">save</button>
+    <div>
+      <button (click)="loadData()">
+        <svg-icon src="assets/icons/fluent-icons/ic_fluent_arrow_clockwise_24_filled.svg"/>
+      </button>
+      <button (click)="save()">
+        <svg-icon src="assets/icons/fluent-icons/ic_fluent_save_24_filled.svg"/>
+      </button>
+    </div>
   </div>
   <div class="ontology-container">
     @for (category of getRootCategories(); track $index) {
       <app-ontology-editor-element
-        [ontology]="ontology"
+        [ontology]="ontology()!!"
         [category]="category"
-        [containers]="containers"
+        [containers]="containers()!!"
       />
     }
   </div>
