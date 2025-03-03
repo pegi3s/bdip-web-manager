@@ -114,6 +114,11 @@ p {
   border-radius: 16px;
   background-color: rgba(var(--slate-600), .4);
   padding: 24px 32px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 
 :host:hover > .name > .expand {

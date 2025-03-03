@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, Signal, signal } from "@angular/core";
 
 import { Ontology } from "../obo/Ontology";
 import { ImageMetadata } from "../models/image-metadata";
@@ -12,9 +12,9 @@ export class ContainerLocalService {
   private diafFileHandle?: FileSystemFileHandle;
   private metadataJsonFileHandle?: FileSystemFileHandle;
 
-  private ontology?: Ontology;
-  private containers?: Map<string, Set<string>>;
-  private containersMetadata?: Map<string, ImageMetadata>;
+  private ontology = signal<Ontology | undefined>(undefined);
+  private containers = signal(new Map<string, Set<string>>());
+  private containersMetadata = signal(new Map<string, ImageMetadata>());
 
   async setMetadataDirectoryHandle(handle: FileSystemHandle): Promise<void> {
     this.metadataDirectoryHandle = handle as FileSystemDirectoryHandle;
@@ -72,14 +72,14 @@ export class ContainerLocalService {
     await writable.close();
   }
 
-  async getOntology(reload: boolean = false): Promise<Ontology | undefined> {
+  getOntology(reload: boolean = false): Signal<Ontology | undefined> {
     if (this.ontology === undefined || reload) {
-      await this.getRawTextFile(this.oboFileHandle)?.then((data) => {
-        this.ontology = new Ontology(data);
+      this.getRawTextFile(this.oboFileHandle)?.then((data) => {
+        this.ontology.set(new Ontology(data));
       });
     }
 
-    return this.ontology;
+    return this.ontology.asReadonly();
   }
 
   /**
@@ -95,7 +95,7 @@ export class ContainerLocalService {
     data.split("\n").forEach((element) => {
       if (!element) return;
 
-      const [key, value] = element.split("\t");
+      const [key, value] = element.split("\t").map(item => item.trim());
       if (!containers.has(key)) {
         containers.set(key, new Set([value]));
       } else {
@@ -112,14 +112,14 @@ export class ContainerLocalService {
    *
    * @returns {Promise<Map<string, Set<string>>>} A Map object where the key is the category and the value is a Set of containers.
    */
-  async getContainersMap(reload: boolean = false): Promise<Map<string, Set<string>> | undefined> {
-    if (this.containers === undefined || reload) {
-      await this.getRawTextFile(this.diafFileHandle)?.then((data) => {
-        this.containers = this.parseContainers(data);
+  getContainersMap(reload: boolean = false): Signal<Map<string, Set<string>>> {
+    if (this.containers().size === 0 || reload) {
+      this.getRawTextFile(this.diafFileHandle)?.then((data) => {
+        this.containers.set(this.parseContainers(data));
       });
     }
 
-    return this.containers;
+    return this.containers.asReadonly();
   }
 
   /**
@@ -128,10 +128,9 @@ export class ContainerLocalService {
    * This method retrieves an array of `ImageMetadata` objects.
    * It then processes this array to create a `Map` where each key is the container's name and the value is its metadata.
    */
-  async getContainersMetadata(reload: boolean = false): Promise<Map<string, ImageMetadata> | undefined> {
-    if (this.containersMetadata === undefined) {
-      const data = await this.getRawTextFile(this.metadataJsonFileHandle);
-      if (data) {
+  getContainersMetadata(reload: boolean = false): Signal<Map<string, ImageMetadata>> {
+    if (this.containersMetadata().size === 0 || reload) {
+      this.getRawTextFile(this.metadataJsonFileHandle)?.then((data) => {
         const metadataJson: ImageMetadata[] = JSON.parse(data);
         const map = new Map<string, ImageMetadata>();
         metadataJson.forEach((item: ImageMetadata) => {
@@ -141,40 +140,54 @@ export class ContainerLocalService {
             map.set(item.name, item);
           }
         });
-        this.containersMetadata = map;
-      }
+        this.containersMetadata.set(map);
+      });
     }
 
-    return this.containersMetadata;
+    return this.containersMetadata.asReadonly();
   }
 
+  // TODO: Using signals could lead to errors if the data is not loaded yet?
   async getContainerMetadata(name: string): Promise<ImageMetadata | undefined> {
-    if (this.containersMetadata === undefined) {
-      await this.getContainersMetadata();
+    if (this.containersMetadata() === undefined) {
+      this.getContainersMetadata();
     }
 
-    return this.containersMetadata?.get(name.trim());
+    return this.containersMetadata()?.get(name.trim());
   }
 
   setContainerMetadata(metadata: ImageMetadata): void {
     const name = metadata.name.trim();
-    this.containersMetadata!.set(name, metadata);
+    this.containersMetadata.update((map) => new Map(map).set(name, metadata));
   }
 
-  async saveOBOFile(ontology?: Ontology): Promise<void> {
-    if (ontology === undefined) {
-      ontology = await this.getOntology();
-    }
-    await this.saveFile('obo', ontology!.toOBOFile());
+  removeContainer(name: string): void {
+    this.containersMetadata.update((map) => {
+      map.delete(name);
+      return new Map(map);
+    });
+    this.containers.update((map) => {
+      map.forEach((value) => console.log(value.delete(name)));
+      return new Map(map);
+    });
   }
 
-  async saveDIAFFile(containers?: Map<string, Set<string>>): Promise<void> {
-    if (containers === undefined) {
-      containers = await this.getContainersMap();
+  async saveOBOFile(): Promise<void> {
+    if (this.ontology() === undefined) {
+      return
     }
+
+    await this.saveFile('obo', this.ontology()!.toOBOFile());
+  }
+
+  async saveDIAFFile(): Promise<void> {
+    if (this.containers() === undefined) {
+      return
+    }
+
     // Create a DIAF mapping by swapping keys and values.
     const diafMap = new Map<string, Set<string>>();
-    containers!.forEach((values, key) => {
+    this.containers()!.forEach((values, key) => {
       values.forEach(value => {
         if (!diafMap.has(value)) {
           diafMap.set(value, new Set<string>());
@@ -197,7 +210,7 @@ export class ContainerLocalService {
 
   async saveMetadataFile(): Promise<void> {
     // Sort map and get values as an array.
-    const sortedMetadata = new Map([...this.containersMetadata!.entries()].sort())
+    const sortedMetadata = new Map([...this.containersMetadata()!.entries()].sort())
     const data = Array.from(sortedMetadata.values());
     // Save JSON data
     const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });

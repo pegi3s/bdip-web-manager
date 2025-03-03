@@ -1,4 +1,4 @@
-import { Component, inject, signal } from "@angular/core";
+import { Component, computed, inject, Signal } from "@angular/core";
 import { TermStanza } from '../obo/TermStanza';
 import { OntologyEditorElementComponent } from '../ontology-editor-element/ontology-editor-element.component';
 import { Ontology } from '../obo/Ontology';
@@ -16,27 +16,24 @@ export class OntologyEditorComponent {
   containerService: ContainerLocalService = inject(ContainerLocalService);
   readonly router = inject(Router);
 
-  readonly ontology = signal<Ontology | undefined>(undefined);
-  readonly containers = signal<Map<string, Set<string>> | undefined>(undefined);
+  ontology!: Signal<Ontology | undefined>;
+  containers!: Signal<Map<string, Set<string>>>;
+  isDataLoaded = computed(() => this.ontology() != undefined && this.containers().size !== 0)
 
   async ngOnInit() {
-    console.log('Loading categories...');
-    this.loadData().then((loaded) => {
-      if (loaded) {
-        console.log('Loaded categories');
-      } else {
-        this.router.navigate(['/']);
-      }
-    });
+    this.loadData();
+    // Wait for the data to be loaded
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    // If the data is not loaded, redirect to the home page
+    if (!this.isDataLoaded()) {
+      this.router.navigate(['/']);
+    }
   }
 
-  async loadData(): Promise<boolean> {
-    this.ontology.set(await this.containerService.getOntology(true));
-    this.containers.set(await this.containerService.getContainersMap(true));
-    await this.containerService.getContainersMetadata(true);
-
-    // Was the data loaded?
-    return this.ontology() != undefined && this.containers() != undefined;
+  loadData(): void {
+    this.ontology = this.containerService.getOntology(true);
+    this.containers = this.containerService.getContainersMap(true);
+    this.containerService.getContainersMetadata(true);
   }
 
   getRootCategories(): TermStanza[] {
@@ -49,8 +46,8 @@ export class OntologyEditorComponent {
 
   async save(): Promise<void> {
     if (this.ontology() != null && this.containers() != null) {
-      await this.containerService.saveOBOFile(this.ontology()!);
-      await this.containerService.saveDIAFFile(this.containers()!);
+      await this.containerService.saveOBOFile();
+      await this.containerService.saveDIAFFile();
       await this.containerService.saveMetadataFile();
     }
   }

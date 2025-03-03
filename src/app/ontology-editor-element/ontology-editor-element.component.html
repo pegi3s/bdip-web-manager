@@ -8,11 +8,8 @@
   <div class="dummy"></div>
 </div>
 <div class="actions">
-  <button>
-    <svg-icon src="assets/icons/fluent-icons/ic_fluent_copy_16_regular.svg"></svg-icon>
-  </button>
   <button (click)="removeStanza()">
-    <svg-icon src="assets/icons/fluent-icons/ic_fluent_dismiss_circle_12_filled.svg"></svg-icon>
+    <svg-icon src="assets/icons/fluent-icons/ic_fluent_delete_16_filled.svg"></svg-icon>
   </button>
 </div>
 
@@ -27,7 +24,14 @@
   @for (container of containers()?.get(category()?.id || ""); track $index) {
     <div class="container">
       {{ container }}
-      <button (click)="createEditContainer(container)">Edit</button>
+      <div class="actions">
+        <button (click)="createEditContainer(container)">
+          <svg-icon src="assets/icons/fluent-icons/ic_fluent_edit_16_filled.svg"></svg-icon>
+        </button>
+        <button (click)="removeContainer(container)">
+          <svg-icon src="assets/icons/fluent-icons/ic_fluent_delete_16_filled.svg"></svg-icon>
+        </button>
+      </div>
     </div>
   }
   <button class="add" (click)="createEditContainer()">

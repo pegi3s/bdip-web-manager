@@ -79,6 +79,10 @@ export class OntologyEditorElementComponent {
     });
   }
 
+  removeContainer(name: string) {
+    this.containerService.removeContainer(name);
+  }
+
   removeStanza() {
     if (this.category()) {
       this.ontology()?.removeTerm(this.category()!);
