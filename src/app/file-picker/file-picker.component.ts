@@ -1,6 +1,7 @@
 import { Component, inject, input, output, signal } from "@angular/core";
 import { SvgIconComponent } from "angular-svg-icon";
 import { ThemeService } from "../services/theme.service";
+import { get } from "idb-keyval";
 
 @Component({
     selector: "app-file-picker",
@@ -23,6 +24,9 @@ export class FilePickerComponent {
 
   readonly fileSystemHandle = signal<FileSystemHandle | undefined>(undefined);
 
+  ngOnInit() {
+    this.retrieveHandleFromIndexedDB();
+  }
 
   // https://developer.chrome.com/docs/capabilities/web-apis/file-system-access#drag_and_drop_integration
   dragoverHandler(event: DragEvent): void {
@@ -78,6 +82,16 @@ export class FilePickerComponent {
       this.fileSystemHandle.set(fileHandle);
       this.fileSelected.emit(fileHandle);
     }
+  }
+
+  private retrieveHandleFromIndexedDB(): void {
+    const handleName = this.pickDirectory() ? `${this.filenameHint()}DirectoryHandle` : `${this.getFileExtension(this.expectedFile()[0])}FileHandle`;
+    get(handleName).then((handle) => {
+      if (handle) {
+        this.fileSystemHandle.set(handle);
+        this.validateHandle(handle);
+      }
+    });
   }
 
   private getFileExtension(fileName: string): string {

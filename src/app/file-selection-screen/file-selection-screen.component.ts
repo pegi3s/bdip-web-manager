@@ -44,7 +44,7 @@ export class FileSelectionScreenComponent {
       this.containerLocalService.setMetadataDirectoryHandle(directoryHandle);
     } else {
       const fileHandles = this.selectedFiles().filter((h) => h.kind === "file");
-      this.containerLocalService.setMetadataFileHandles(fileHandles);
+      this.containerLocalService.setMetadataFileHandles(fileHandles, true);
     }
 
     // Navigate to the next screen

@@ -2,6 +2,7 @@ import { Injectable, Signal, signal } from "@angular/core";
 
 import { Ontology } from "../obo/Ontology";
 import { ImageMetadata } from "../models/image-metadata";
+import { set } from "idb-keyval";
 
 @Injectable({
   providedIn: "root"
@@ -16,6 +17,7 @@ export class ContainerLocalService {
   private containers = signal(new Map<string, Set<string>>());
   private containersMetadata = signal(new Map<string, ImageMetadata>());
 
+  /* File handling methods */
   async setMetadataDirectoryHandle(handle: FileSystemHandle): Promise<void> {
     this.metadataDirectoryHandle = handle as FileSystemDirectoryHandle;
 
@@ -24,21 +26,31 @@ export class ContainerLocalService {
       files.push(entry);
     }
 
-    this.setMetadataFileHandles(files);
+    this.setMetadataFileHandles(files, false);
+    set("metadataDirectoryHandle", this.metadataDirectoryHandle);
   }
 
-  setMetadataFileHandles(handles: FileSystemHandle[]): void {
+  setMetadataFileHandles(handles: FileSystemHandle[], storeInIndexedDB: boolean = false): void {
     handles.forEach(handle => {
       if (handle.kind === "file") {
         switch (handle.name) {
           case "dio.obo":
             this.oboFileHandle = handle as FileSystemFileHandle;
+            if (storeInIndexedDB) {
+              set("oboFileHandle", this.oboFileHandle);
+            }
             break;
           case "dio.diaf":
             this.diafFileHandle = handle as FileSystemFileHandle;
+            if (storeInIndexedDB) {
+              set("diafFileHandle", this.diafFileHandle);
+            }
             break;
           case "metadata.json":
             this.metadataJsonFileHandle = handle as FileSystemFileHandle;
+            if (storeInIndexedDB) {
+              set("jsonFileHandle", this.metadataJsonFileHandle);
+            }
             break;
         }
       }
@@ -72,6 +84,7 @@ export class ContainerLocalService {
     await writable.close();
   }
 
+  /* Data processing methods */
   getOntology(reload: boolean = false): Signal<Ontology | undefined> {
     if (this.ontology === undefined || reload) {
       this.getRawTextFile(this.oboFileHandle)?.then((data) => {
