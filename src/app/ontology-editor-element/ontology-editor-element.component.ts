@@ -67,8 +67,9 @@ export class OntologyEditorElementComponent {
       } as ImageMetadata;
 
     const dialogRef = this.dialog.open(ImageMetadataDialogComponent, {
-      width: '800px',
-      maxHeight: '90vh',
+      width: '85%',
+      maxWidth: '800px',
+      maxHeight: '90%',
       data: { metadata }
     });
 

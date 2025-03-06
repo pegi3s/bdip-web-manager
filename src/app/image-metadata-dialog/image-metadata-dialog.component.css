@@ -6,8 +6,8 @@
 .dialog-container {
   display: flex;
   flex-direction: column;
-  max-height: 90vh;
-  width: 800px;
+  height: 100%;
+  width: 100%;
   overflow: hidden;
   padding: 24px;
   box-sizing: border-box;
