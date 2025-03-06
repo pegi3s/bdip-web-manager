@@ -85,11 +85,17 @@
             <div class="form-field">
               <label [for]="'recommended_version_' + i">Version *</label>
               <input [id]="'recommended_version_' + i" type="text" formControlName="version">
+              @if (item.get('version')?.touched && item.get('version')?.invalid) {
+                <div class="error">Version is required</div>
+              }
             </div>
 
             <div class="form-field">
               <label [for]="'recommended_date_' + i">Date *</label>
               <input [id]="'recommended_date_' + i" type="date" formControlName="date">
+              @if (item.get('date')?.touched && item.get('date')?.invalid) {
+                <div class="error">Date is required</div>
+              }
             </div>
 
             <button type="button" class="remove-btn" (click)="removeRecommended(i)">Remove</button>
@@ -276,6 +282,9 @@
             <div class="form-field">
               <label [for]="'auto_test_docker_image_' + i">Docker Image *</label>
               <input [id]="'auto_test_docker_image_' + i" type="text" formControlName="docker_image">
+              @if (autoTest.get('docker_image')?.touched && autoTest.get('docker_image')?.invalid) {
+                <div class="error">Docker image is required</div>
+              }
             </div>
 
             <div class="form-field">
@@ -296,6 +305,9 @@
             <div class="form-field">
               <label [for]="'auto_test_commands_' + i">Commands *</label>
               <textarea [id]="'auto_test_commands_' + i" formControlName="commands" rows="4"></textarea>
+              @if (autoTest.get('commands')?.touched && autoTest.get('commands')?.invalid) {
+                <div class="error">Commands are required</div>
+              }
             </div>
 
             <!-- Input Files for this Auto Test -->
