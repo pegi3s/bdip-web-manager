@@ -1,4 +1,4 @@
-:root {
+:host {
   --hr-color: #e0e0e0;
 }
 
@@ -25,6 +25,7 @@
 .dialog-content {
   flex: 1;
   overflow-y: auto;
+  scrollbar-width: thin;
   padding-inline: 6px;
   max-height: calc(90vh - 161px);
 }
@@ -96,6 +97,12 @@
   line-height: calc(1.25 / 0.875);
   color: rgb(var(--main-font-color));
   background-color: #f9fafb;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:has(+ .error) {
+    background-color: rgb(var(--red-100));
+    border-color: rgb(var(--red-300));
+  }
 }
 
 .form-field input:focus,
@@ -236,7 +243,12 @@
 :host-context(.dark) .form-field textarea,
 :host-context(.dark) .form-field select {
   background-color: rgba(var(--slate-700), 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.05);
+
+  &:has(+ .error) {
+    background-color: rgba(var(--red-900), 0.15);
+    border-color: rgba(var(--red-700), 0.5);
+  }
 }
 
 :host-context(.dark) .array-item {
