@@ -9,9 +9,14 @@ section {
   gap: 20px;
   grid-template-columns: 1fr min-content 1fr;
 
+  @media (width < 768px) {
+    grid-template-columns: 1fr;
+  }
+
   /* or */
   > p {
     align-self: center;
+    justify-self: center;
   }
 }
 
@@ -34,7 +39,7 @@ button {
   border: none;
   transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  grid-column: 1 / span 3;
+  grid-column: 1 / -1;
 
   &:hover {
     background-color: rgba(var(--picton-blue-700), 0.9);
