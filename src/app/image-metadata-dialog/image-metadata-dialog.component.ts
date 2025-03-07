@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, Inject } from "@angular/core";
+import { Component, ElementRef, HostListener, inject, Inject, signal } from "@angular/core";
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { AutoTests, BugFound, ImageMetadata, Recommended } from "../models/image-metadata";
 import { Dialog, DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
@@ -30,12 +30,6 @@ export class ImageMetadataDialogComponent {
 
   ngOnInit(): void {
     this.initForm();
-    // Add global listener to handle ESC key
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        this.onCancel();
-      }
-    });
   }
 
   initForm(): void {
@@ -226,7 +220,7 @@ export class ImageMetadataDialogComponent {
   }
 
   onSubmit(): void {
-    if (this.form.valid) {
+    if (this.form.valid || this.isShiftPressed()) {
       console.log(this.form.value);
       this.dialogRef.close(this.form.value);
     } else {
@@ -251,5 +245,22 @@ export class ImageMetadataDialogComponent {
         });
       }
     });
+  }
+
+  readonly isShiftPressed = signal<boolean>(false);
+
+  @HostListener('window:keydown.shift', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    this.isShiftPressed.set(true);
+  }
+
+  @HostListener('window:keyup.shift', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    this.isShiftPressed.set(false);
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  handleEscape(event: KeyboardEvent) {
+    this.onCancel();
   }
 }

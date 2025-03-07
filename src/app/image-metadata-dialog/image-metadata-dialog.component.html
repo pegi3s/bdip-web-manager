@@ -336,7 +336,7 @@
 
     <div class="dialog-actions">
       <button type="button" class="btn cancel-btn" (click)="onCancel()">Cancel</button>
-      <button type="submit" class="btn submit-btn">Save Changes</button>
+      <button type="submit" class="btn submit-btn">Save Changes{{isShiftPressed() ? ' (without validation)' : ''}}</button>
     </div>
   </form>
 </div>
