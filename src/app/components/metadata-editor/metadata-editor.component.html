@@ -1,0 +1,91 @@
+<div class="metadata-editor">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Docker Images</h2>
+      <button
+        type="button"
+        class="btn btn-primary btn-icon"
+        (click)="onAddItem()"
+        aria-label="Add new image"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="search-box">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        type="search"
+        placeholder="Search images..."
+        [value]="searchQuery()"
+        (input)="onSearch($event)"
+        aria-label="Search docker images"
+      />
+    </div>
+
+    <div class="items-list" role="listbox" aria-label="Docker images list">
+      @for (item of filteredItems(); track item.name; let i = $index) {
+        <button
+          type="button"
+          class="item-row"
+          [class.selected]="isItemSelected(item)"
+          [attr.aria-selected]="isItemSelected(item)"
+          role="option"
+          (click)="onSelectItem(i)"
+        >
+          <div class="item-info">
+            <span class="item-name">{{ item.name }}</span>
+            <span class="item-desc">{{ item.description }}</span>
+          </div>
+          <div class="item-meta">
+            <span class="badge" [class]="getStatusClass(item.status)">
+              {{ item.status }}
+            </span>
+            @if (item.gui) {
+              <span class="badge badge-accent">GUI</span>
+            }
+          </div>
+        </button>
+      } @empty {
+        <div class="empty-state">
+          @if (searchQuery()) {
+            <p>No images match "{{ searchQuery() }}"</p>
+          } @else {
+            <p>No images loaded</p>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="sidebar-footer">
+      <span class="item-count">
+        {{ filteredItems().length }} of {{ dataState.metadata().length }} images
+      </span>
+    </div>
+  </aside>
+
+  <main class="editor-content">
+    @if (selectedItem()) {
+      <app-metadata-form
+        [item]="selectedItem()!"
+        (itemChange)="onItemChange($event)"
+        (delete)="onDeleteItem(selectedIndex()!)"
+      />
+    } @else {
+      <div class="empty-editor">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        <h3>Select an image to edit</h3>
+        <p>Choose an image from the list or add a new one</p>
+      </div>
+    }
+  </main>
+</div>

@@ -1,0 +1,679 @@
+@if (formData(); as data) {
+  <div class="form-container">
+    <div class="form-header">
+      <h2>{{ data.name || 'New Image' }}</h2>
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="onDelete()"
+        aria-label="Delete this image"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        Delete
+      </button>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="tabs" role="tablist">
+      @for (tab of tabs; track tab.id) {
+        <button
+          type="button"
+          role="tab"
+          class="tab"
+          [class.active]="activeTab() === tab.id"
+          [attr.aria-selected]="activeTab() === tab.id"
+          (click)="onTabChange(tab.id)"
+        >
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+
+    <!-- Tab panels -->
+    <div class="tab-content">
+      <!-- Basic Info Tab -->
+      @if (activeTab() === 'basic') {
+        <div class="tab-panel" role="tabpanel">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="name">Name *</label>
+              <input
+                type="text"
+                id="name"
+                [(ngModel)]="data.name"
+                (ngModelChange)="onFieldChange()"
+                placeholder="e.g., abyss"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="status">Status</label>
+              <select
+                id="status"
+                [(ngModel)]="data.status"
+                (ngModelChange)="onFieldChange()"
+              >
+                @for (status of statusOptions; track status) {
+                  <option [value]="status">{{ status }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="description">Description *</label>
+              <input
+                type="text"
+                id="description"
+                [(ngModel)]="data.description"
+                (ngModelChange)="onFieldChange()"
+                placeholder="e.g., de novo sequence assembler"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="latest">Latest Version</label>
+              <input
+                type="text"
+                id="latest"
+                [(ngModel)]="data.latest"
+                (ngModelChange)="onFieldChange()"
+                placeholder="e.g., 2.1.0"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="icon">Icon URL</label>
+              <input
+                type="url"
+                id="icon"
+                [(ngModel)]="data.icon"
+                (ngModelChange)="onFieldChange()"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label>
+                <input
+                  type="checkbox"
+                  [(ngModel)]="data.gui"
+                  (ngModelChange)="onFieldChange()"
+                />
+                Has GUI
+              </label>
+            </div>
+
+            @if (data.gui) {
+              <div class="form-group">
+                <label for="gui_command">GUI Command</label>
+                <input
+                  type="text"
+                  id="gui_command"
+                  [(ngModel)]="data.gui_command"
+                  (ngModelChange)="onFieldChange()"
+                  placeholder="e.g., /opt/ADOPS/run.sh"
+                />
+              </div>
+            }
+
+            <div class="form-group">
+              <label for="podman">Podman Status</label>
+              <input
+                type="text"
+                id="podman"
+                [(ngModel)]="data.podman"
+                (ngModelChange)="onFieldChange()"
+                placeholder="e.g., untested"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="singularity">Singularity Status</label>
+              <input
+                type="text"
+                id="singularity"
+                [(ngModel)]="data.singularity"
+                (ngModelChange)="onFieldChange()"
+                placeholder="e.g., untested"
+              />
+            </div>
+
+            <div class="form-group full-width">
+              <label>Comments</label>
+              <app-array-field
+                [items]="data.comments"
+                (add)="onArrayAdd('comments', $event)"
+                (remove)="onArrayRemove('comments', $event)"
+                (update)="onArrayUpdate('comments', $event.index, $event.value)"
+                placeholder="Add a comment..."
+              />
+            </div>
+
+            <div class="form-group full-width">
+              <label>Input Data Types</label>
+              <app-array-field
+                [items]="data.input_data_type"
+                (add)="onArrayAdd('input_data_type', $event)"
+                (remove)="onArrayRemove('input_data_type', $event)"
+                (update)="onArrayUpdate('input_data_type', $event.index, $event.value)"
+                placeholder="e.g., fastq1"
+              />
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Categories Tab -->
+      @if (activeTab() === 'categories') {
+        <div class="tab-panel" role="tabpanel">
+          <section class="category-panel">
+            <div class="category-toolbar">
+              <div class="category-search">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input
+                  type="search"
+                  placeholder="Search categories..."
+                  [value]="categorySearch()"
+                  (input)="onCategorySearch($event)"
+                  aria-label="Search ontology categories"
+                />
+              </div>
+              <div class="category-summary">
+                Selected: {{ selectedCategoryIds().length }}
+              </div>
+            </div>
+
+            @if (filteredRootOntologyTerms().length) {
+              <div class="category-tree" role="tree" aria-label="Ontology categories tree">
+                @for (term of filteredRootOntologyTerms(); track term.id) {
+                  <ng-container
+                    [ngTemplateOutlet]="categoryTree"
+                    [ngTemplateOutletContext]="{ term: term, level: 0 }"
+                  />
+                }
+              </div>
+            } @else {
+              <p class="empty-message">No categories match your search</p>
+            }
+
+            <ng-template #categoryTree let-term="term" let-level="level">
+              <div class="category-tree-item" [style.padding-left.px]="level * 18" role="treeitem">
+                <label
+                  class="category-item"
+                  [class.selected]="isCategorySelected(term.id)"
+                >
+                  <input
+                    type="checkbox"
+                    [id]="getCategoryInputId(term.id)"
+                    [checked]="isCategorySelected(term.id)"
+                    (change)="onCategoryCheckboxChange(term.id, $event)"
+                  />
+                  <span class="category-text">
+                    <span class="category-id">{{ term.id }}</span>
+                    <span class="category-name">{{ term.name || term.id }}</span>
+                  </span>
+                </label>
+              </div>
+              @if (getVisibleCategoryChildren(term).length) {
+                <div class="category-tree-group" role="group">
+                  @for (child of getVisibleCategoryChildren(term); track child.id) {
+                    <ng-container
+                      [ngTemplateOutlet]="categoryTree"
+                      [ngTemplateOutletContext]="{ term: child, level: level + 1 }"
+                    />
+                  }
+                </div>
+              }
+            </ng-template>
+          </section>
+        </div>
+      }
+
+      <!-- Versions Tab -->
+      @if (activeTab() === 'versions') {
+        <div class="tab-panel" role="tabpanel">
+          <section class="form-section">
+            <div class="section-header">
+              <h3>Recommended Versions</h3>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="onAddRecommended()"
+              >
+                + Add Version
+              </button>
+            </div>
+            @for (rec of data.recommended; track $index; let i = $index) {
+              <div class="nested-item">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Version</label>
+                    <input
+                      type="text"
+                      [ngModel]="rec.version"
+                      (ngModelChange)="onUpdateRecommended(i, 'version', $event)"
+                      placeholder="e.g., 2.1.0"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Date</label>
+                    <input
+                      type="text"
+                      [ngModel]="rec.date"
+                      (ngModelChange)="onUpdateRecommended(i, 'date', $event)"
+                      placeholder="e.g., 25/11/2024"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-icon remove-btn"
+                  (click)="onRemoveRecommended(i)"
+                  aria-label="Remove version"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+            }
+          </section>
+
+          <section class="form-section">
+            <div class="section-header">
+              <h3>Bug Found Versions</h3>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="onAddBugFound()"
+              >
+                + Add Entry
+              </button>
+            </div>
+
+            @for (bug of data.bug_found; track $index; let i = $index) {
+              <div class="nested-item">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Version</label>
+                    <input
+                      type="text"
+                      [ngModel]="bug.version"
+                      (ngModelChange)="onUpdateBugFound(i, 'version', $event)"
+                      placeholder="e.g., 2.1.0"
+                    />
+                  </div>
+                  <div class="form-group full-width">
+                    <label>Description</label>
+                    <input
+                      type="text"
+                      [ngModel]="bug.description"
+                      (ngModelChange)="onUpdateBugFound(i, 'description', $event)"
+                      placeholder="Describe the issue"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-icon remove-btn"
+                  (click)="onRemoveBugFound(i)"
+                  aria-label="Remove bug entry"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+            } @empty {
+              <p class="empty-message">No bug versions configured</p>
+            }
+          </section>
+
+          <section class="form-section">
+            <h3>Not Working Versions</h3>
+            <app-array-field
+              [items]="data.not_working"
+              (add)="onArrayAdd('not_working', $event)"
+              (remove)="onArrayRemove('not_working', $event)"
+              (update)="onArrayUpdate('not_working', $event.index, $event.value)"
+              placeholder="Version not working..."
+            />
+          </section>
+
+          <section class="form-section">
+            <h3>No Longer Tested Versions</h3>
+            <app-array-field
+              [items]="data.no_longer_tested"
+              (add)="onArrayAdd('no_longer_tested', $event)"
+              (remove)="onArrayRemove('no_longer_tested', $event)"
+              (update)="onArrayUpdate('no_longer_tested', $event.index, $event.value)"
+              placeholder="Version no longer tested..."
+            />
+          </section>
+        </div>
+      }
+
+      <!-- URLs Tab -->
+      @if (activeTab() === 'urls') {
+        <div class="tab-panel" role="tabpanel">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="manual_url">Manual URL</label>
+              <input
+                type="url"
+                id="manual_url"
+                [(ngModel)]="data.manual_url"
+                (ngModelChange)="onFieldChange()"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div class="form-group full-width">
+              <label for="source_url">Source URL</label>
+              <input
+                type="url"
+                id="source_url"
+                [(ngModel)]="data.source_url"
+                (ngModelChange)="onFieldChange()"
+                placeholder="https://github.com/..."
+              />
+            </div>
+
+            <div class="form-group full-width">
+              <label for="test_data_url">Test Data URL</label>
+              <input
+                type="url"
+                id="test_data_url"
+                [(ngModel)]="data.test_data_url"
+                (ngModelChange)="onFieldChange()"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div class="form-group full-width">
+              <label for="test_results_url">Test Results URL</label>
+              <input
+                type="url"
+                id="test_results_url"
+                [(ngModel)]="data.test_results_url"
+                (ngModelChange)="onFieldChange()"
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Commands Tab -->
+      @if (activeTab() === 'commands') {
+        <div class="tab-panel" role="tabpanel">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="invocation_general">General Invocation</label>
+              <textarea
+                id="invocation_general"
+                [(ngModel)]="data.invocation_general"
+                (ngModelChange)="onFieldChange()"
+                rows="2"
+                placeholder="docker run --rm -v /your/data/dir:/data pegi3s/..."
+              ></textarea>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="usual_invocation_specific">Usual Specific Invocation</label>
+              <textarea
+                id="usual_invocation_specific"
+                [(ngModel)]="data.usual_invocation_specific"
+                (ngModelChange)="onFieldChange()"
+                rows="3"
+                placeholder="Command arguments..."
+              ></textarea>
+            </div>
+
+            <div class="form-group full-width">
+              <label>Invocation Comments</label>
+              <app-array-field
+                [items]="data.usual_invocation_specific_comments"
+                (add)="onArrayAdd('usual_invocation_specific_comments', $event)"
+                (remove)="onArrayRemove('usual_invocation_specific_comments', $event)"
+                (update)="onArrayUpdate('usual_invocation_specific_comments', $event.index, $event.value)"
+                placeholder="Add a comment..."
+                [multiline]="true"
+              />
+            </div>
+
+            <div class="form-group full-width">
+              <label for="test_invocation_specific">Test Invocation</label>
+              <textarea
+                id="test_invocation_specific"
+                [(ngModel)]="data.test_invocation_specific"
+                (ngModelChange)="onFieldChange()"
+                rows="3"
+                placeholder="Test command..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Tests Tab -->
+      @if (activeTab() === 'tests') {
+        <div class="tab-panel" role="tabpanel">
+          <div class="section-header">
+            <h3>Auto Tests</h3>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="onAddAutoTest()"
+            >
+              + Add Test
+            </button>
+          </div>
+
+          @for (test of data.auto_tests; track $index; let i = $index) {
+            <div class="nested-item expandable">
+              <div class="nested-header">
+                <span class="nested-title">
+                  {{ test.docker_image || 'New Test' }}
+                </span>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-icon"
+                  (click)="onRemoveAutoTest(i)"
+                  aria-label="Remove test"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="nested-content">
+                <div class="form-grid">
+                  <div class="form-group full-width">
+                    <label>Docker Image</label>
+                    <input
+                      type="text"
+                      [ngModel]="test.docker_image"
+                      (ngModelChange)="onUpdateAutoTest(i, 'docker_image', $event)"
+                      placeholder="pegi3s/image:version"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label>Output Directory</label>
+                    <input
+                      type="text"
+                      [ngModel]="test.output_dir"
+                      (ngModelChange)="onUpdateAutoTest(i, 'output_dir', $event)"
+                      placeholder="output_dir"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label>Output File</label>
+                    <input
+                      type="text"
+                      [ngModel]="test.output_file"
+                      (ngModelChange)="onUpdateAutoTest(i, 'output_file', $event)"
+                      placeholder="output.fa"
+                    />
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label>Additional Config</label>
+                    <input
+                      type="text"
+                      [ngModel]="test.add_config"
+                      (ngModelChange)="onUpdateAutoTest(i, 'add_config', $event)"
+                      placeholder="Additional configuration..."
+                    />
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label>Commands</label>
+                    <textarea
+                      [ngModel]="test.commands"
+                      (ngModelChange)="onUpdateAutoTest(i, 'commands', $event)"
+                      rows="3"
+                      placeholder="bash -c '...'"
+                    ></textarea>
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label>Input Files (comma-separated)</label>
+                    <input
+                      type="text"
+                      [ngModel]="test.input_files.join(', ')"
+                      (ngModelChange)="onUpdateAutoTestInputFiles(i, $event)"
+                      placeholder="file1.fastq, file2.fastq"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <p class="empty-message">No auto tests configured</p>
+          }
+        </div>
+      }
+
+      <!-- Search Tab -->
+      @if (activeTab() === 'search') {
+        <div class="tab-panel" role="tabpanel">
+          <h3>Custom Search URLs</h3>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="search_pubmed">PubMed</label>
+              <input
+                type="text"
+                id="search_pubmed"
+                [ngModel]="data.custom_searches.pubmed"
+                (ngModelChange)="onUpdateCustomSearch('pubmed', $event)"
+                placeholder="term=..."
+              />
+            </div>
+
+            <div class="form-group full-width">
+              <label for="search_scholar">Google Scholar</label>
+              <input
+                type="text"
+                id="search_scholar"
+                [ngModel]="data.custom_searches.scholar"
+                (ngModelChange)="onUpdateCustomSearch('scholar', $event)"
+                placeholder="q=..."
+              />
+            </div>
+
+            <div class="form-group full-width">
+              <label for="search_bioprotocol">Bio-protocol</label>
+              <input
+                type="text"
+                id="search_bioprotocol"
+                [ngModel]="data.custom_searches.bioprotocol"
+                (ngModelChange)="onUpdateCustomSearch('bioprotocol', $event)"
+                placeholder="content=..."
+              />
+            </div>
+
+            <div class="form-group full-width">
+              <label for="search_bioprotocol_exchange">Bio-protocol Exchange</label>
+              <input
+                type="text"
+                id="search_bioprotocol_exchange"
+                [ngModel]="data.custom_searches.bioprotocol_exchange"
+                (ngModelChange)="onUpdateCustomSearch('bioprotocol_exchange', $event)"
+                placeholder="content=..."
+              />
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Alternatives Tab -->
+      @if (activeTab() === 'alternatives') {
+        <div class="tab-panel" role="tabpanel">
+          <div class="section-header">
+            <h3>Alternative Dockerfiles</h3>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="onAddAlternativeDockerfile()"
+            >
+              + Add Dockerfile
+            </button>
+          </div>
+
+          @for (key of getAlternativeKeys(); track key) {
+            <div class="nested-item">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Variant Name</label>
+                  <input
+                    type="text"
+                    [ngModel]="key"
+                    (ngModelChange)="onUpdateAlternativeDockerfile(key, $event, data.alternatives?.dockerfiles?.[key] ?? '')"
+                    placeholder="e.g., k128"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>URL</label>
+                  <input
+                    type="url"
+                    [ngModel]="data.alternatives?.dockerfiles?.[key]"
+                    (ngModelChange)="onUpdateAlternativeDockerfile(key, key, $event)"
+                    placeholder="https://..."
+                  />
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn btn-ghost btn-icon remove-btn"
+                (click)="onRemoveAlternativeDockerfile(key)"
+                aria-label="Remove dockerfile"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          } @empty {
+            <p class="empty-message">No alternative dockerfiles</p>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

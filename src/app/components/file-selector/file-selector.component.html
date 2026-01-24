@@ -1,0 +1,139 @@
+<div class="file-selector">
+  @if (error()) {
+    <div class="error-banner" role="alert">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <div class="drop-zones-container">
+    <!-- Folder drop zone (left side) -->
+    <div class="drop-zone-wrapper folder-zone">
+      <div
+        class="drop-zone"
+        [class.drag-over]="isDragOverFolder()"
+        [class.loading]="isLoading()"
+        (dragover)="onDragOver($event, 'folder')"
+        (dragleave)="onDragLeave($event, 'folder')"
+        (drop)="onDropFolder($event)"
+        (click)="onSelectFolder()"
+        role="button"
+        tabindex="0"
+        [attr.aria-busy]="isLoading()"
+        aria-label="Click or drop metadata folder"
+      >
+        @if (isLoading()) {
+          <div class="spinner"></div>
+        } @else {
+          <svg-icon src="icons/fluent-icons/ic_fluent_folder_arrow_up_48_regular.svg" class="zone-icon"/>
+          <span class="zone-text">Click to upload or drag and drop</span>
+          <span class="zone-label">metadata folder</span>
+        }
+      </div>
+    </div>
+
+    <!-- Or divider -->
+    <div class="divider">
+      <span>or</span>
+    </div>
+
+    <!-- Individual file drop zones (right side) -->
+    <div class="drop-zone-wrapper files-zone">
+      <!-- dio.obo -->
+      <div
+        class="drop-zone file-drop"
+        [class.drag-over]="isDragOverObo()"
+        [class.loaded]="loadedFiles().obo"
+        (dragover)="onDragOver($event, 'obo')"
+        (dragleave)="onDragLeave($event, 'obo')"
+        (drop)="onDropFile($event, 'obo')"
+        (click)="onSelectSingleFile('obo')"
+        role="button"
+        tabindex="0"
+        aria-label="Click or drop dio.obo file"
+      >
+        <svg-icon src="icons/fluent-icons/ic_fluent_document_arrow_up_20_regular.svg" class="zone-icon" [svgStyle]="{ 'height.px':32,'width.px':32 }"/>
+        <span class="zone-text">Click to upload or drag and drop</span>
+        <span class="zone-label">dio.obo</span>
+        @if (loadedFiles().obo) {
+          <span class="check-mark">✓</span>
+        }
+      </div>
+
+      <!-- dio.diaf -->
+      <div
+        class="drop-zone file-drop"
+        [class.drag-over]="isDragOverDiaf()"
+        [class.loaded]="loadedFiles().diaf"
+        (dragover)="onDragOver($event, 'diaf')"
+        (dragleave)="onDragLeave($event, 'diaf')"
+        (drop)="onDropFile($event, 'diaf')"
+        (click)="onSelectSingleFile('diaf')"
+        role="button"
+        tabindex="0"
+        aria-label="Click or drop dio.diaf file"
+      >
+        <svg-icon src="icons/fluent-icons/ic_fluent_document_arrow_up_20_regular.svg" class="zone-icon" [svgStyle]="{ 'height.px':32,'width.px':32 }"/>
+        <span class="zone-text">Click to upload or drag and drop</span>
+        <span class="zone-label">dio.diaf</span>
+        @if (loadedFiles().diaf) {
+          <span class="check-mark">✓</span>
+        }
+      </div>
+
+      <!-- metadata.json -->
+      <div
+        class="drop-zone file-drop"
+        [class.drag-over]="isDragOverMetadata()"
+        [class.loaded]="loadedFiles().metadata"
+        (dragover)="onDragOver($event, 'metadata')"
+        (dragleave)="onDragLeave($event, 'metadata')"
+        (drop)="onDropFile($event, 'metadata')"
+        (click)="onSelectSingleFile('metadata')"
+        role="button"
+        tabindex="0"
+        aria-label="Click or drop metadata.json file"
+      >
+        <svg-icon src="icons/fluent-icons/ic_fluent_document_arrow_up_20_regular.svg" class="zone-icon" [svgStyle]="{ 'height.px':32,'width.px':32 }"/>
+        <span class="zone-text">Click to upload or drag and drop</span>
+        <span class="zone-label">metadata.json</span>
+        @if (loadedFiles().metadata) {
+          <span class="check-mark">✓</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden file inputs for fallback -->
+  <input
+    #folderInput
+    type="file"
+    webkitdirectory
+    directory
+    multiple
+    hidden
+    (change)="onFolderInputChange($event)"
+  />
+  <input
+    #fileInput
+    type="file"
+    [accept]="currentFileAccept()"
+    hidden
+    (change)="onFileInputChange($event)"
+  />
+
+  @if (!supportsFileSystemAccess()) {
+    <div class="browser-notice">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <span>For best experience, use Chrome or Edge. Files will need to be re-selected after refresh in this browser.</span>
+    </div>
+  }
+</div>
