@@ -108,14 +108,18 @@
   --font-size-2xl: 1.6rem;
   --font-size-3xl: 2.2rem;
 
+  --line-height-xs: calc(1 / 0.75);
+  --line-height-sm: calc(1.25 / 0.875);
+  --line-height-base: calc(1.5 / 1);
+  --line-height-lg: calc(1.75 / 1.125);
+  --line-height-xl: calc(1.75 / 1.25);
+  --line-height-2xl: calc(2 / 1.5);
+  --line-height-3xl: calc(2.25 / 1.875);
+
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-
-  --line-height-tight: 1.2;
-  --line-height-normal: 1.55;
-  --line-height-relaxed: 1.8;
 
   /* Spacing */
   --space-1: 0.25rem;
@@ -215,7 +219,7 @@ html {
 body {
   font-family: var(--font-family);
   font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
+  line-height: var(--line-height-base);
   color: var(--color-text-primary);
   background: var(--color-bg-primary);
   min-height: 100vh;
@@ -263,7 +267,7 @@ svg-icon {
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
+  line-height: var(--line-height-3xl);
   color: var(--color-text-primary);
 }
 
@@ -534,10 +538,10 @@ button:disabled {
 .text-center { text-align: center; }
 .font-medium { font-weight: var(--font-weight-medium); }
 .font-semibold { font-weight: var(--font-weight-semibold); }
-.truncate { 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-  white-space: nowrap; 
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Visibility */
@@ -759,13 +763,13 @@ button:disabled {
 }
 
 @keyframes slideIn {
-  from { 
-    opacity: 0; 
-    transform: translateY(-10px); 
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -780,9 +784,9 @@ button:disabled {
     --font-size-3xl: 1.75rem;
     --font-size-2xl: 1.375rem;
   }
-  
+
   .hide-mobile { display: none !important; }
-  
+
   .grid-cols-2,
   .grid-cols-3 {
     grid-template-columns: 1fr;
@@ -842,7 +846,7 @@ button:disabled {
   .split-pane {
     grid-template-columns: 1fr;
   }
-  
+
   .split-pane-sidebar {
     border-right: none;
     border-bottom: 1px solid var(--color-border);

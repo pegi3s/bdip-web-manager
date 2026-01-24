@@ -113,7 +113,6 @@ import { DataStateService } from '../../services/data-state.service';
       font-size: var(--font-size-sm);
       display: flex;
       flex-direction: column;
-      gap: var(--space-2);
     }
 
     .root-drop-zone {
@@ -123,6 +122,7 @@ import { DataStateService } from '../../services/data-state.service';
       padding: var(--space-2) var(--space-3);
       border: 1px dashed var(--color-border);
       border-radius: var(--radius-md);
+      margin-bottom: var(--space-2);
       font-size: var(--font-size-xs);
       color: var(--color-text-tertiary);
       background: color-mix(in srgb, var(--color-surface) 70%, transparent);
@@ -209,11 +209,7 @@ import { DataStateService } from '../../services/data-state.service';
 
     .badge-sm {
       font-size: var(--font-size-xs);
-      padding: 0 var(--space-1);
-    }
-
-    .tree-group {
-      /* Indent is handled by padding-left on tree-item */
+      padding: 0 var(--space-2);
     }
   `,
 })
