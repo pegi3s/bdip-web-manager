@@ -16,6 +16,22 @@ export class HeaderComponent {
   protected readonly fileSystem = inject(FileSystemService);
   private readonly router = inject(Router);
 
+  protected getSaveLabel(): string {
+    if (this.dataState.sourceMode() === 'github') {
+      return 'Commit';
+    }
+
+    return this.fileSystem.canSaveDirectly() ? 'Save' : 'Download';
+  }
+
+  protected getSaveAriaLabel(): string {
+    if (this.dataState.sourceMode() === 'github') {
+      return 'Commit changes to GitHub';
+    }
+
+    return this.fileSystem.canSaveDirectly() ? 'Save files' : 'Download files';
+  }
+
   async onSave(): Promise<void> {
     await this.dataState.saveAll();
   }

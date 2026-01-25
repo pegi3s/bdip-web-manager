@@ -168,6 +168,74 @@
   animation: spin 0.8s linear infinite;
 }
 
+.spinner.small {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.github-panel {
+  width: 100%;
+  max-width: 900px;
+  background: color-mix(in srgb, var(--color-bg-secondary) 95%, transparent);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.github-panel-header h2 {
+  margin: 0 0 var(--space-1) 0;
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+}
+
+.github-panel-header p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.github-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+
+.github-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.github-form input {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+}
+
+.github-form small {
+  color: var(--color-text-secondary);
+}
+
+.github-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.github-status {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

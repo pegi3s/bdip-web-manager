@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, ElementRef, ViewChild, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { FileSystemService } from '../../services/file-system.service';
 import { DataStateService } from '../../services/data-state.service';
 import { SvgIconComponent } from "angular-svg-icon";
+import { GithubRepoService } from '../../services/github-repo.service';
 
 type DropZone = 'folder' | 'obo' | 'diaf' | 'metadata';
 
@@ -16,6 +17,7 @@ type DropZone = 'folder' | 'obo' | 'diaf' | 'metadata';
 export class FileSelectorComponent {
   private fileSystemService = inject(FileSystemService);
   private dataStateService = inject(DataStateService);
+  private githubRepoService = inject(GithubRepoService);
   private router = inject(Router);
 
   @ViewChild('folderInput') folderInput!: ElementRef<HTMLInputElement>;
@@ -24,6 +26,21 @@ export class FileSelectorComponent {
   protected readonly supportsFileSystemAccess = this.fileSystemService.supportsFileSystemAccess;
   protected readonly isLoading = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly githubError = signal<string | null>(null);
+  protected readonly isGithubLoading = signal(false);
+  protected readonly githubStatus = this.githubRepoService.statusMessage;
+
+  protected readonly githubRepo = signal('pegi3s/dockerfiles');
+  protected readonly githubBranch = signal('master');
+  protected readonly githubToken = signal('');
+  protected readonly githubAuthorName = signal('');
+  protected readonly githubAuthorEmail = signal('');
+
+  private readonly storageKeys = {
+    githubToken: 'bdip.github.token',
+    githubAuthorName: 'bdip.github.authorName',
+    githubAuthorEmail: 'bdip.github.authorEmail',
+  } as const;
 
   // Individual drag states
   protected readonly isDragOverFolder = signal(false);
@@ -47,6 +64,134 @@ export class FileSelectorComponent {
 
   protected readonly currentFileAccept = signal('.json,.obo,.diaf');
   private currentFileType: 'obo' | 'diaf' | 'metadata' = 'metadata';
+
+  constructor() {
+    this.restoreGithubPrefs();
+    this.setupGithubPersistence();
+  }
+
+  async onLoadFromGithub(): Promise<void> {
+    this.githubError.set(null);
+    this.isGithubLoading.set(true);
+
+    try {
+      this.githubRepoService.setToken(this.githubToken());
+      this.githubRepoService.setAuthor(
+        this.githubAuthorName(),
+        this.githubAuthorEmail()
+      );
+      const result = await this.githubRepoService.connectAndLoad(
+        this.githubRepo(),
+        this.githubBranch()
+      );
+
+      this.dataStateService.loadData(result.metadata, result.obo, result.diaf, 'github');
+      await this.router.navigate(['/metadata']);
+    } catch (err) {
+      this.githubError.set((err as Error).message);
+    } finally {
+      this.isGithubLoading.set(false);
+    }
+  }
+
+  onGithubRepoInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.githubRepo.set(target?.value ?? '');
+  }
+
+  onGithubBranchInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.githubBranch.set(target?.value ?? '');
+  }
+
+  onGithubTokenInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.githubToken.set(target?.value ?? '');
+  }
+
+  onGithubAuthorNameInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.githubAuthorName.set(target?.value ?? '');
+  }
+
+  onGithubAuthorEmailInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.githubAuthorEmail.set(target?.value ?? '');
+  }
+
+  private restoreGithubPrefs(): void {
+    if (!this.isBrowser()) return;
+
+    const token = this.readSessionValue(this.storageKeys.githubToken);
+    const authorName = this.readLocalValue(this.storageKeys.githubAuthorName);
+    const authorEmail = this.readLocalValue(this.storageKeys.githubAuthorEmail);
+
+    if (token) this.githubToken.set(token);
+    if (authorName) this.githubAuthorName.set(authorName);
+    if (authorEmail) this.githubAuthorEmail.set(authorEmail);
+  }
+
+  private setupGithubPersistence(): void {
+    effect(() => {
+      this.writeSessionValue(this.storageKeys.githubToken, this.githubToken());
+    });
+
+    effect(() => {
+      this.writeLocalValue(this.storageKeys.githubAuthorName, this.githubAuthorName());
+    });
+
+    effect(() => {
+      this.writeLocalValue(this.storageKeys.githubAuthorEmail, this.githubAuthorEmail());
+    });
+  }
+
+  private isBrowser(): boolean {
+    return typeof window !== 'undefined';
+  }
+
+  private readLocalValue(key: string): string {
+    if (!this.isBrowser()) return '';
+    try {
+      return window.localStorage.getItem(key) ?? '';
+    } catch {
+      return '';
+    }
+  }
+
+  private writeLocalValue(key: string, value: string): void {
+    if (!this.isBrowser()) return;
+    try {
+      if (!value) {
+        window.localStorage.removeItem(key);
+      } else {
+        window.localStorage.setItem(key, value);
+      }
+    } catch {
+      return;
+    }
+  }
+
+  private readSessionValue(key: string): string {
+    if (!this.isBrowser()) return '';
+    try {
+      return window.sessionStorage.getItem(key) ?? '';
+    } catch {
+      return '';
+    }
+  }
+
+  private writeSessionValue(key: string, value: string): void {
+    if (!this.isBrowser()) return;
+    try {
+      if (!value) {
+        window.sessionStorage.removeItem(key);
+      } else {
+        window.sessionStorage.setItem(key, value);
+      }
+    } catch {
+      return;
+    }
+  }
 
   async onSelectFolder(): Promise<void> {
     // If File System Access API is supported, use it

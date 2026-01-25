@@ -3,8 +3,10 @@ import { MetadataItem } from '../models/metadata.model';
 import { Ontology } from '../models/ontology';
 import { DiafMapping, parseDiaf, serializeDiaf } from '../models/diaf.model';
 import { FileSystemService } from './file-system.service';
+import { GithubRepoService } from './github-repo.service';
 
 export type EditorMode = 'metadata' | 'ontology';
+export type SourceMode = 'local' | 'github' | null;
 
 /**
  * Data State Service
@@ -15,6 +17,7 @@ export type EditorMode = 'metadata' | 'ontology';
 })
 export class DataStateService {
   private fileSystemService = inject(FileSystemService);
+  private githubRepoService = inject(GithubRepoService);
 
   // Current editor mode
   readonly currentMode = signal<EditorMode>('metadata');
@@ -31,6 +34,7 @@ export class DataStateService {
 
   // Files loaded state
   readonly filesLoaded = signal(false);
+  readonly sourceMode = signal<SourceMode>(null);
 
   // Selected items
   readonly selectedMetadataIndex = signal<number | null>(null);
@@ -75,7 +79,12 @@ export class DataStateService {
   /**
    * Load files and parse data
    */
-  loadData(metadataJson: string, oboContent: string, diafContent: string): void {
+  loadData(
+    metadataJson: string,
+    oboContent: string,
+    diafContent: string,
+    sourceMode: SourceMode = 'local'
+  ): void {
     try {
       const metadataItems: MetadataItem[] = JSON.parse(metadataJson);
       const ontology = new Ontology(oboContent);
@@ -91,6 +100,7 @@ export class DataStateService {
       this.originalDiafContent.set(diafContent);
 
       this.filesLoaded.set(true);
+      this.sourceMode.set(sourceMode);
 
       // Select first item by default
       if (metadataItems.length > 0) {
@@ -171,6 +181,25 @@ export class DataStateService {
     const oboContent = this.ontology()?.toString() ?? '';
     const diafContent = serializeDiaf(this.diafMappings());
 
+    if (this.sourceMode() === 'github') {
+      const message = window.prompt('Commit message', 'Update metadata');
+      if (!message || message.trim().length === 0) {
+        return false;
+      }
+
+      await this.githubRepoService.commitChanges(
+        message.trim(),
+        metadataContent,
+        oboContent,
+        diafContent
+      );
+
+      this.originalMetadataJson.set(metadataContent);
+      this.originalOboContent.set(oboContent);
+      this.originalDiafContent.set(diafContent);
+      return true;
+    }
+
     const result = await this.fileSystemService.saveFiles(
       metadataContent,
       oboContent,
@@ -198,6 +227,7 @@ export class DataStateService {
     this.originalOboContent.set('');
     this.originalDiafContent.set('');
     this.filesLoaded.set(false);
+    this.sourceMode.set(null);
     this.selectedMetadataIndex.set(null);
     this.selectedTermId.set(null);
     this.currentMode.set('metadata');

@@ -136,4 +136,101 @@
       <span>For best experience, use Chrome or Edge. Files will need to be re-selected after refresh in this browser.</span>
     </div>
   }
+
+  <section class="github-panel" aria-label="Load from GitHub">
+    <div class="github-panel-header">
+      <h2>Load from GitHub</h2>
+      <p>Fetch only metadata files without cloning the full repo.</p>
+    </div>
+
+    @if (githubError()) {
+      <div class="error-banner" role="alert">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>{{ githubError() }}</span>
+      </div>
+    }
+
+    <div class="github-form">
+      <label class="field">
+        <span>Repository</span>
+        <input
+          type="text"
+          [value]="githubRepo()"
+          (input)="onGithubRepoInput($event)"
+          placeholder="owner/repo"
+          autocomplete="off"
+        />
+      </label>
+
+      <label class="field">
+        <span>Branch</span>
+        <input
+          type="text"
+          [value]="githubBranch()"
+          (input)="onGithubBranchInput($event)"
+          placeholder="master"
+          autocomplete="off"
+        />
+      </label>
+
+      <label class="field">
+        <span>GitHub token</span>
+        <input
+          type="password"
+          [value]="githubToken()"
+          (input)="onGithubTokenInput($event)"
+          placeholder="ghp_..."
+          autocomplete="off"
+        />
+        <small>Fine-grained token -> Only select repositories -> Contents: Read & Write</small>
+      </label>
+
+      <label class="field">
+        <span>Commit author name</span>
+        <input
+          type="text"
+          [value]="githubAuthorName()"
+          (input)="onGithubAuthorNameInput($event)"
+          autocomplete="off"
+        />
+      </label>
+
+      <label class="field">
+        <span>Commit author email</span>
+        <input
+          type="email"
+          [value]="githubAuthorEmail()"
+          (input)="onGithubAuthorEmailInput($event)"
+          autocomplete="off"
+        />
+        <small>Email must be verified on GitHub to avoid noreply.</small>
+      </label>
+    </div>
+
+    <div class="github-actions">
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="onLoadFromGithub()"
+        [attr.aria-busy]="isGithubLoading()"
+      >
+        @if (isGithubLoading()) {
+          <span class="spinner small"></span>
+        } @else {
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14"></path>
+            <path d="M5 12h14"></path>
+          </svg>
+        }
+        <span>Load from GitHub</span>
+      </button>
+      @if (githubStatus()) {
+        <span class="github-status" role="status">{{ githubStatus() }}</span>
+      }
+    </div>
+  </section>
 </div>
