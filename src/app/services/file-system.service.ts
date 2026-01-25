@@ -51,21 +51,8 @@ export class FileSystemService {
         mode: 'readwrite',
       });
 
-      let metadataHandle: FileSystemFileHandle | undefined;
-      let oboHandle: FileSystemFileHandle | undefined;
-      let diafHandle: FileSystemFileHandle | undefined;
-
-      for await (const entry of dirHandle.values()) {
-        if (entry.kind === 'file') {
-          if (entry.name === 'metadata.json') {
-            metadataHandle = entry;
-          } else if (entry.name === 'dio.obo') {
-            oboHandle = entry;
-          } else if (entry.name === 'dio.diaf') {
-            diafHandle = entry;
-          }
-        }
-      }
+      const handles = await this.findRequiredHandles(dirHandle);
+      const { metadataHandle, oboHandle, diafHandle, sourceDirectory } = handles;
 
       if (!metadataHandle || !oboHandle || !diafHandle) {
         throw new Error(
@@ -77,14 +64,16 @@ export class FileSystemService {
         metadataHandle,
         oboHandle,
         diafHandle,
-        directoryHandle: dirHandle,
+        directoryHandle: sourceDirectory ?? dirHandle,
       });
 
       this.loadedFiles.set({
         metadata: 'metadata.json',
         obo: 'dio.obo',
         diaf: 'dio.diaf',
-        directory: dirHandle.name,
+        directory: sourceDirectory
+          ? `${dirHandle.name}/${sourceDirectory.name}`
+          : dirHandle.name,
       });
 
       const metadataContent = await this.readFileHandle(metadataHandle);
@@ -186,16 +175,37 @@ export class FileSystemService {
     let oboFile: File | undefined;
     let diafFile: File | undefined;
 
+    const metadataCandidates: Array<{ file: File; score: number }> = [];
+    const oboCandidates: Array<{ file: File; score: number }> = [];
+    const diafCandidates: Array<{ file: File; score: number }> = [];
+
+    const isMetadataPath = (path: string | undefined): boolean => {
+      if (!path) return false;
+      const normalized = path.replace(/\\/g, '/').toLowerCase();
+      return normalized.includes('/metadata/') || normalized.startsWith('metadata/');
+    };
+
+    const scoreForPath = (path: string | undefined): number => {
+      if (!path) return 0;
+      return isMetadataPath(path) ? 2 : 0;
+    };
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+      const relativePath = this.getRelativePath(file);
+
       if (file.name === 'metadata.json') {
-        metadataFile = file;
+        metadataCandidates.push({ file, score: scoreForPath(relativePath) });
       } else if (file.name === 'dio.obo' || file.name.endsWith('.obo')) {
-        oboFile = file;
+        oboCandidates.push({ file, score: scoreForPath(relativePath) });
       } else if (file.name === 'dio.diaf' || file.name.endsWith('.diaf')) {
-        diafFile = file;
+        diafCandidates.push({ file, score: scoreForPath(relativePath) });
       }
     }
+
+    metadataFile = this.pickBestCandidate(metadataCandidates);
+    oboFile = this.pickBestCandidate(oboCandidates);
+    diafFile = this.pickBestCandidate(diafCandidates);
 
     if (!metadataFile || !oboFile || !diafFile) {
       return null;
@@ -257,6 +267,81 @@ export class FileSystemService {
   private async readFileHandle(handle: FileSystemFileHandle): Promise<string> {
     const file = await handle.getFile();
     return await file.text();
+  }
+
+  private getRelativePath(file: File): string | undefined {
+    const fileWithPath = file as File & { webkitRelativePath?: string; relativePath?: string };
+    return fileWithPath.relativePath || fileWithPath.webkitRelativePath || undefined;
+  }
+
+  private pickBestCandidate(
+    candidates: Array<{ file: File; score: number }>
+  ): File | undefined {
+    if (candidates.length === 0) return undefined;
+    return candidates.reduce((best, current) =>
+      current.score > best.score ? current : best
+    ).file;
+  }
+
+  private async findRequiredHandles(
+    dirHandle: FileSystemDirectoryHandle
+  ): Promise<{
+    metadataHandle: FileSystemFileHandle;
+    oboHandle: FileSystemFileHandle;
+    diafHandle: FileSystemFileHandle;
+    sourceDirectory?: FileSystemDirectoryHandle;
+  }> {
+    let metadataHandle: FileSystemFileHandle | undefined;
+    let oboHandle: FileSystemFileHandle | undefined;
+    let diafHandle: FileSystemFileHandle | undefined;
+    let metadataDirectory: FileSystemDirectoryHandle | undefined;
+
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind === 'file') {
+        if (entry.name === 'metadata.json') {
+          metadataHandle = entry;
+        } else if (entry.name === 'dio.obo') {
+          oboHandle = entry;
+        } else if (entry.name === 'dio.diaf') {
+          diafHandle = entry;
+        }
+      } else if (entry.kind === 'directory' && entry.name === 'metadata') {
+        metadataDirectory = entry;
+      }
+    }
+
+    if (metadataHandle && oboHandle && diafHandle) {
+      return { metadataHandle, oboHandle, diafHandle };
+    }
+
+    if (metadataDirectory) {
+      let subMetadataHandle: FileSystemFileHandle | undefined;
+      let subOboHandle: FileSystemFileHandle | undefined;
+      let subDiafHandle: FileSystemFileHandle | undefined;
+
+      for await (const entry of metadataDirectory.values()) {
+        if (entry.kind === 'file') {
+          if (entry.name === 'metadata.json') {
+            subMetadataHandle = entry;
+          } else if (entry.name === 'dio.obo') {
+            subOboHandle = entry;
+          } else if (entry.name === 'dio.diaf') {
+            subDiafHandle = entry;
+          }
+        }
+      }
+
+      if (subMetadataHandle && subOboHandle && subDiafHandle) {
+        return {
+          metadataHandle: subMetadataHandle,
+          oboHandle: subOboHandle,
+          diafHandle: subDiafHandle,
+          sourceDirectory: metadataDirectory,
+        };
+      }
+    }
+
+    throw new Error('Folder must contain metadata.json, dio.obo, and dio.diaf files');
   }
 
   private async writeFileHandle(

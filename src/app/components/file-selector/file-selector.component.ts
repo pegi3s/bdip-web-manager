@@ -171,10 +171,14 @@ export class FileSelectorComponent {
     }
   }
 
-  private readFilesFromDirectory(dirEntry: FileSystemDirectoryEntry): Promise<File[]> {
+  private readFilesFromDirectory(
+    dirEntry: FileSystemDirectoryEntry,
+    parentPath = ''
+  ): Promise<File[]> {
     return new Promise((resolve, reject) => {
       const reader = dirEntry.createReader();
       const files: File[] = [];
+      const currentPath = parentPath ? `${parentPath}${dirEntry.name}/` : `${dirEntry.name}/`;
 
       const readEntries = () => {
         reader.readEntries(
@@ -188,7 +192,16 @@ export class FileSelectorComponent {
               if (entry.isFile) {
                 const fileEntry = entry as FileSystemFileEntry;
                 const file = await this.getFileFromEntry(fileEntry);
+                (file as File & { relativePath?: string }).relativePath =
+                  `${currentPath}${file.name}`;
                 files.push(file);
+              } else if (entry.isDirectory) {
+                const subDirEntry = entry as FileSystemDirectoryEntry;
+                const nestedFiles = await this.readFilesFromDirectory(
+                  subDirEntry,
+                  currentPath
+                );
+                files.push(...nestedFiles);
               }
             }
 
