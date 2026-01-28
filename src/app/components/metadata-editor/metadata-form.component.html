@@ -205,7 +205,12 @@
             }
 
             <ng-template #categoryTree let-term="term" let-level="level">
-              <div class="category-tree-item" [style.padding-left.px]="level * 18" role="treeitem">
+              <div
+                class="category-tree-item"
+                role="treeitem"
+                [style.--level]="level"
+                [class.is-child]="level > 0"
+              >
                 <label
                   class="category-item"
                   [class.selected]="isCategorySelected(term.id)"

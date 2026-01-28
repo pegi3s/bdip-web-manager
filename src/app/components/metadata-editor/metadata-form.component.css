@@ -245,12 +245,16 @@
 
 .category-tree-item {
   display: flex;
+  position: relative;
 }
 
 .category-tree-group {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  margin-left: 18px;
+  padding-left: 12px;
+  border-left: 1px solid color-mix(in srgb, var(--color-text-tertiary) 35%, transparent);
 }
 
 .category-item {
@@ -258,10 +262,10 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
-  border: 1px solid transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
+  position: relative;
 }
 
 .category-item:hover {
