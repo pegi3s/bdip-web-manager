@@ -232,4 +232,13 @@ export class DataStateService {
     this.selectedTermId.set(null);
     this.currentMode.set('metadata');
   }
+
+  /**
+   * Refresh ontology signal after in-place mutations
+   */
+  refreshOntology(): void {
+    const current = this.ontology();
+    if (!current) return;
+    this.ontology.set(new Ontology(current.toString()));
+  }
 }

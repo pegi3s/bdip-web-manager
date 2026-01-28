@@ -105,7 +105,7 @@ export class OntologyEditorComponent {
 
     if (window.confirm(message)) {
       ontology.removeTerm(term);
-      this.dataState.ontology.set(ontology);
+      this.dataState.refreshOntology();
       this.dataState.selectedTermId.set(null);
     }
   }
@@ -115,7 +115,7 @@ export class OntologyEditorComponent {
     if (!ontology) return;
     const moved = ontology.moveTerm(event.termId, event.newParentId);
     if (moved) {
-      this.dataState.ontology.set(ontology);
+      this.dataState.refreshOntology();
     }
   }
 
@@ -144,7 +144,7 @@ export class OntologyEditorComponent {
       const newId = ontology.getNextId();
       const parentId = this.createParentId();
       ontology.createTerm(newId, name, definition, parentId ?? undefined);
-      this.dataState.ontology.set(ontology);
+      this.dataState.refreshOntology();
       this.dataState.selectedTermId.set(newId);
       this.isCreating.set(false);
       this.createParentId.set(null);
@@ -155,7 +155,7 @@ export class OntologyEditorComponent {
     if (!term) return;
     term.name = name;
     term.definition = definition;
-    this.dataState.ontology.set(ontology);
+    this.dataState.refreshOntology();
   }
 
   onCancelCreate(): void {
