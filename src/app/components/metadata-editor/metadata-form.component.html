@@ -183,17 +183,31 @@
                   placeholder="Search categories..."
                   [value]="categorySearch()"
                   (input)="onCategorySearch($event)"
+                  [disabled]="showSelectedOnly()"
                   aria-label="Search ontology categories"
                 />
               </div>
-              <div class="category-summary">
-                Selected: {{ selectedCategoryIds().length }}
+              <div class="category-meta">
+                <div class="category-summary">
+                  Selected: {{ selectedCategoryIds().length }}
+                </div>
+                <div class="category-toggle">
+                  <label class="category-toggle-label">
+                    <input
+                      type="checkbox"
+                      [checked]="showSelectedOnly()"
+                      (change)="onShowSelectedOnlyChange($event)"
+                      aria-label="Show selected categories only"
+                    />
+                    <span>Show selected only</span>
+                  </label>
+                </div>
               </div>
             </div>
 
-            @if (filteredRootOntologyTerms().length) {
+            @if (displayRootOntologyTerms().length) {
               <div class="category-tree" role="tree" aria-label="Ontology categories tree">
-                @for (term of filteredRootOntologyTerms(); track term.id) {
+                @for (term of displayRootOntologyTerms(); track term.id) {
                   <ng-container
                     [ngTemplateOutlet]="categoryTree"
                     [ngTemplateOutletContext]="{ term: term, level: 0 }"
@@ -201,7 +215,11 @@
                 }
               </div>
             } @else {
-              <p class="empty-message">No categories match your search</p>
+              @if (showSelectedOnly()) {
+                <p class="empty-message">No categories selected yet</p>
+              } @else {
+                <p class="empty-message">No categories match your search</p>
+              }
             }
 
             <ng-template #categoryTree let-term="term" let-level="level">
@@ -227,9 +245,9 @@
                   </span>
                 </label>
               </div>
-              @if (getVisibleCategoryChildren(term).length) {
+              @if (getCategoryChildrenForDisplay(term).length) {
                 <div class="category-tree-group" role="group">
-                  @for (child of getVisibleCategoryChildren(term); track child.id) {
+                  @for (child of getCategoryChildrenForDisplay(term); track child.id) {
                     <ng-container
                       [ngTemplateOutlet]="categoryTree"
                       [ngTemplateOutletContext]="{ term: child, level: level + 1 }"

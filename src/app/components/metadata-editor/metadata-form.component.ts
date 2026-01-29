@@ -58,6 +58,7 @@ export class MetadataFormComponent {
   protected readonly statusOptions: MetadataStatus[] = ['Usable', 'Unusable', 'Not_recommended'];
 
   protected readonly categorySearch = signal('');
+  protected readonly showSelectedOnly = signal(false);
 
   protected readonly allOntologyTerms = computed<TermStanza[]>(() => {
     return this.dataState.ontology()?.getAllOntologyTerms() ?? [];
@@ -65,6 +66,10 @@ export class MetadataFormComponent {
 
   protected readonly rootOntologyTerms = computed<TermStanza[]>(() => {
     return this.dataState.ontology()?.getRootTerms() ?? [];
+  });
+
+  protected readonly termById = computed<Map<string, TermStanza>>(() => {
+    return new Map(this.allOntologyTerms().map((term) => [term.id, term]));
   });
 
   protected readonly visibleCategoryIds = computed<Set<string>>(() => {
@@ -121,6 +126,24 @@ export class MetadataFormComponent {
     return this.dataState.getMappingsForSoftware(name).map((m) => m.dioId);
   });
 
+  protected readonly selectedCategoryIdSet = computed<Set<string>>(() => {
+    return new Set(this.selectedCategoryIds());
+  });
+
+  protected readonly selectedCategoryRoots = computed<TermStanza[]>(() => {
+    const selected = this.selectedCategoryIdSet();
+    const allTerms = this.allOntologyTerms();
+    return allTerms.filter(
+      (term) => selected.has(term.id) && !this.hasSelectedAncestor(term, selected)
+    );
+  });
+
+  protected readonly displayRootOntologyTerms = computed<TermStanza[]>(() => {
+    return this.showSelectedOnly()
+      ? this.selectedCategoryRoots()
+      : this.filteredRootOntologyTerms();
+  });
+
   constructor() {
     // Sync input to form data
     effect(() => {
@@ -138,6 +161,12 @@ export class MetadataFormComponent {
     this.categorySearch.set(input.value);
   }
 
+  onShowSelectedOnlyChange(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    if (!input) return;
+    this.showSelectedOnly.set(input.checked);
+  }
+
   isCategoryVisible(term: TermStanza): boolean {
     return this.visibleCategoryIds().has(term.id);
   }
@@ -145,6 +174,28 @@ export class MetadataFormComponent {
   getVisibleCategoryChildren(term: TermStanza): TermStanza[] {
     const visible = this.visibleCategoryIds();
     return term.getChildren().filter((child) => visible.has(child.id));
+  }
+
+  getSelectedCategoryChildren(term: TermStanza): TermStanza[] {
+    const selected = this.selectedCategoryIdSet();
+    return term.getChildren().filter((child) => selected.has(child.id));
+  }
+
+  getCategoryChildrenForDisplay(term: TermStanza): TermStanza[] {
+    return this.showSelectedOnly()
+      ? this.getSelectedCategoryChildren(term)
+      : this.getVisibleCategoryChildren(term);
+  }
+
+  private hasSelectedAncestor(term: TermStanza, selected: Set<string>): boolean {
+    const stack = [...term.getParents()];
+    while (stack.length > 0) {
+      const parent = stack.pop();
+      if (!parent) continue;
+      if (selected.has(parent.id)) return true;
+      parent.getParents().forEach((ancestor) => stack.push(ancestor));
+    }
+    return false;
   }
 
 
