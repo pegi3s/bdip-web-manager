@@ -117,8 +117,18 @@
                 <span>Children: {{ selectedTerm()!.getChildren().length }}</span>
               </div>
             }
-            @if (isCreating() && createParentId()) {
-              <p class="term-parent">Parent: {{ createParentId() }}</p>
+            @if (isCreating() && createParentHierarchy().length > 0) {
+              <div class="term-parent" role="group" aria-label="Parent hierarchy">
+                <span class="term-parent-label">Parent hierarchy</span>
+                <div class="term-parent-path">
+                  @for (node of createParentHierarchy(); track node.id) {
+                    <span class="term-parent-node">{{ node.name || node.id }}</span>
+                    @if (!$last) {
+                      <span class="term-parent-sep" aria-hidden="true">/</span>
+                    }
+                  }
+                </div>
+              </div>
             }
             <div class="term-edit">
               <div class="form-group">

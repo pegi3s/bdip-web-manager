@@ -9,6 +9,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { DataStateService } from '../../services/data-state.service';
 import { OntologyTreeComponent } from './ontology-tree.component';
+import { TermStanza } from '../../models/ontology';
 
 @Component({
   selector: 'app-ontology-editor',
@@ -55,6 +56,17 @@ export class OntologyEditorComponent {
   protected readonly selectedTerm = this.dataState.selectedTerm;
   protected readonly selectedTermId = this.dataState.selectedTermId;
 
+  protected readonly createParentHierarchy = computed(() => {
+    const ontology = this.dataState.ontology();
+    const parentId = this.createParentId();
+    if (!ontology || !parentId) return [];
+
+    const parent = ontology.findTermById(parentId);
+    if (!parent) return [];
+
+    return this.buildParentChain(parent);
+  });
+
   protected readonly isFormValid = computed(() => {
     return this.draftName().trim().length > 0 && this.draftDefinition().trim().length > 0;
   });
@@ -86,7 +98,7 @@ export class OntologyEditorComponent {
     if (!ontology) return;
 
     this.isCreating.set(true);
-    this.createParentId.set(null);
+    this.createParentId.set(this.selectedTermId());
     this.draftName.set('');
     this.draftDefinition.set('');
     this.formTouched.set(false);
@@ -169,5 +181,21 @@ export class OntologyEditorComponent {
 
   getMappingsCount(termId: string): number {
     return this.dataState.getMappingsForTerm(termId).length;
+  }
+
+  private buildParentChain(term: TermStanza): TermStanza[] {
+    const chain: TermStanza[] = [term];
+    const visited = new Set<string>([term.id]);
+    let current = term;
+
+    while (current.getParents().length > 0) {
+      const nextParent = current.getParents()[0];
+      if (!nextParent || visited.has(nextParent.id)) break;
+      chain.unshift(nextParent);
+      visited.add(nextParent.id);
+      current = nextParent;
+    }
+
+    return chain;
   }
 }
