@@ -190,6 +190,43 @@
               </div>
             </div>
           </div>
+
+          @if (!isCreating() && selectedTerm()) {
+            <section
+              class="term-images-card"
+              role="region"
+              aria-label="Images mapped to selected term"
+            >
+              <div class="term-images-header">
+                <h4>Mapped images</h4>
+                <span class="badge badge-accent">
+                  {{ selectedTermImages().length }}
+                </span>
+              </div>
+
+              @if (selectedTermImages().length > 0) {
+                <div class="term-images-list" role="list">
+                  @for (image of selectedTermImages(); track image.name) {
+                    <article class="term-image-item" role="listitem">
+                      <div class="term-image-content">
+                        <p class="term-image-name">{{ image.name }}</p>
+                        @if (image.description) {
+                          <p class="term-image-description">{{ image.description }}</p>
+                        }
+                      </div>
+                      @if (image.status) {
+                        <span class="badge">{{ image.status }}</span>
+                      }
+                    </article>
+                  }
+                </div>
+              } @else {
+                <p class="term-images-empty">
+                  No images mapped to this term yet.
+                </p>
+              }
+            </section>
+          }
         } @else {
           <div class="empty-editor">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">

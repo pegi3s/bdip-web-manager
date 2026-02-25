@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { DataStateService } from '../../services/data-state.service';
 import { OntologyTreeComponent } from './ontology-tree.component';
 import { TermStanza } from '../../models/ontology';
+import { MetadataItem } from '../../models/metadata.model';
 
 @Component({
   selector: 'app-ontology-editor',
@@ -55,6 +56,24 @@ export class OntologyEditorComponent {
 
   protected readonly selectedTerm = this.dataState.selectedTerm;
   protected readonly selectedTermId = this.dataState.selectedTermId;
+
+  protected readonly selectedTermImages = computed<MetadataItem[]>(() => {
+    const selectedId = this.selectedTermId();
+    if (!selectedId) return [];
+
+    const metadataByName = new Map(
+      this.dataState.metadata().map((item) => [item.name, item])
+    );
+
+    const uniqueNames = new Set(
+      this.dataState.getMappingsForTerm(selectedId).map((mapping) => mapping.name)
+    );
+
+    return Array.from(uniqueNames)
+      .map((name) => metadataByName.get(name))
+      .filter((item): item is MetadataItem => !!item)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  });
 
   protected readonly createParentHierarchy = computed(() => {
     const ontology = this.dataState.ontology();
